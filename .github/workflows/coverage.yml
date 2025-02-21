@@ -43,5 +43,5 @@ jobs:
         run: yarn
 
       - name: Run unit tests with coverage (Jest)
-        working-directory: front
+        working-directory: back
         run: yarn test:cov
