@@ -3,7 +3,7 @@ name: Run Tests and Coverage
 on: [push, pull_request]
 
 jobs:
-  test:
+  test-front:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,3 +24,24 @@ jobs:
       - name: Run unit tests with coverage (Vitest)
         working-directory: front
         run: yarn coverage
+  test-back:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: back/yarn.lock
+
+      - name: Install dependencies
+        working-directory: back
+        run: yarn
+
+      - name: Run unit tests with coverage (Jest)
+        working-directory: front
+        run: yarn test:cov
