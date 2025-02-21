@@ -14,7 +14,8 @@
     "build": "quasar build",
     "postinstall": "quasar prepare",
     "test:unit": "vitest",
-    "test:unit:ci": "vitest run"
+    "test:unit:ci": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
@@ -30,6 +31,7 @@
     "@pinia/testing": "^1.0.0",
     "@quasar/app-vite": "^2.0.0",
     "@quasar/quasar-app-extension-testing-unit-vitest": "^1.1.0",
+    "@vitest/coverage-istanbul": "^3.0.6",
     "@vue/eslint-config-prettier": "^10.1.0",
     "@vue/test-utils": "^2.4.4",
     "autoprefixer": "^10.4.2",
