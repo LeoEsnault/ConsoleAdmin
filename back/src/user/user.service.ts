@@ -1,6 +1,8 @@
 import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { UserNotFoundException, ProfileNotFoundException } from '../exceptions/user.exceptions';
+import { v4 as uuidv4 } from 'uuid';
+import { PostgrestError } from '@supabase/supabase-js';
+import * as userExceptions from '../exceptions/user.exceptions';
 
 export interface User {
   id: string;
@@ -13,6 +15,10 @@ export interface Profile {
   id: string;
   firstname: string;
   lastname: string;
+}
+
+export interface CreateUser {
+  email: string;
 }
 
 @Injectable()
@@ -33,7 +39,7 @@ export class UserService {
     });
 
     if (usersError) {
-      throw new UserNotFoundException();
+      throw new userExceptions.UserNotFoundException();
     }
 
     const userIds = users.users.map((user) => user.id);
@@ -44,7 +50,7 @@ export class UserService {
       .in('auth_id', userIds);
 
     if (profilesError) {
-      throw new ProfileNotFoundException();
+      throw new userExceptions.ProfileNotFoundException();
     }
 
     // match profiles // auth.users
@@ -76,4 +82,62 @@ export class UserService {
       totalPages,
     };
   }
+
+  async createUser(body: CreateUser): Promise<User> {
+    const supabase = this.supabaseService.getClient();
+
+    if (!body.email || !isValidEmail(body.email)) {
+      throw new userExceptions.InvalidUserDataException();
+    }
+
+    const uuid: string = uuidv4();
+    const { data: user, error: authError } = await supabase.auth.admin.createUser({
+      email: body.email,
+      password: uuid,
+    });
+
+    if (authError) {
+      if (authError.code === 'email_exists') {
+        throw new userExceptions.UserAlreadyExistsException();
+      }
+
+      throw new userExceptions.UserCreationException();
+    }
+
+    if (!user || !user.user) {
+      throw new userExceptions.UserCreationException();
+    }
+
+    const { data: profile, error: profileError }: { data: Profile | null; error: PostgrestError | null } =
+      await supabase
+        .from('profiles')
+        .insert([
+          {
+            auth_id: user.user.id,
+            firstname: '',
+            lastname: '',
+          },
+        ])
+        .select()
+        .single();
+
+    if (profileError) {
+      throw new userExceptions.ProfileCreationException();
+    }
+
+    if (!profile) {
+      throw new userExceptions.ProfileNotFoundException();
+    }
+
+    return {
+      id: user.user.id,
+      email: user.user.email,
+      profile,
+    };
+  }
 }
+
+const isValidEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@_]+(\.[^\s@_]+)+$/;
+  return emailRegex.test(email);
+};

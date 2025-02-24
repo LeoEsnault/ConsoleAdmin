@@ -1,4 +1,5 @@
 <template>
+  <div>
   <div class="desktop-only row items-center q-gutter-x-md">
     <div class="col">
       <div id="userEmail">{{ userEmail }}</div>
@@ -36,6 +37,7 @@
       </q-expansion-item>
     </q-list>
   </div>
+</div>
 </template>
 
 <script setup>

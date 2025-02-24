@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { api } from 'boot/axios'
 import qs from 'qs'
+import { Notify } from 'quasar'
 
 export const useUsersStore = defineStore('users', {
   state: () => ({
@@ -21,11 +22,32 @@ export const useUsersStore = defineStore('users', {
         )
 
         const response = await api.get(`/users?${query}`)
-        console.log('RESPONSE', response)
         return response.data
       } catch (error) {
         console.error('Erreur lors de la récupération des données :', error)
         return []
+      }
+    },
+
+    async addUser(data) {
+      try {
+        const response = await api.post(`/users`, data)
+
+        Notify.create({
+          message: "L'utilisateur a été ajouté.",
+          type: 'positive',
+          position: 'top',
+        })
+
+        return response.data
+      } catch (error) {
+        console.error(error)
+
+        Notify.create({
+          message: 'Une erreur est survenue.',
+          type: 'negative',
+          position: 'top',
+        })
       }
     },
   },

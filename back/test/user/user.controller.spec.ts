@@ -1,8 +1,8 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { UserController } from "../../src/user/user.controller";
-import { UserService } from "../../src/user/user.service";
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserController } from '../../src/user/user.controller';
+import { UserService } from '../../src/user/user.service';
 
-describe("UserController", () => {
+describe('UserController', () => {
   let userController: UserController;
   let userService: UserService;
 
@@ -14,6 +14,7 @@ describe("UserController", () => {
           provide: UserService,
           useValue: {
             getAllUsers: jest.fn(),
+            createUser: jest.fn(),
           },
         },
       ],
@@ -23,12 +24,13 @@ describe("UserController", () => {
     userService = moduleRef.get<UserService>(UserService);
   });
 
-  it("devrait appeler UserService.getAllUsers avec les bons paramètres et retourner la réponse", async () => {
+  // GET
+  it('devrait appeler UserService.getAllUsers avec les bons paramètres et retourner la réponse', async () => {
     const page = 1;
     const pageSize = 10;
-    const mockUsersResponse = { users: [{ id: "1", email: "john@example.com" }], totalPages: 1 };
+    const mockUsersResponse = { users: [{ id: '1', email: 'john@example.com' }], totalPages: 1 };
 
-    const spy = jest.spyOn(userService, "getAllUsers").mockResolvedValue(mockUsersResponse);
+    const spy = jest.spyOn(userService, 'getAllUsers').mockResolvedValue(mockUsersResponse);
 
     const result = await userController.getAllUsers(page, pageSize);
 
@@ -37,11 +39,34 @@ describe("UserController", () => {
     expect(result).toEqual(mockUsersResponse);
   });
 
-  it("devrait lever une erreur en cas de problème avec UserService", async () => {
+  it('devrait lever une erreur en cas de problème avec UserService', async () => {
     const page = 1;
     const pageSize = 10;
 
-    jest.spyOn(userService, "getAllUsers").mockRejectedValue(new Error("Erreur générique"));
-    await expect(userController.getAllUsers(page, pageSize)).rejects.toThrow("Erreur interne du serveur");
+    jest.spyOn(userService, 'getAllUsers').mockRejectedValue(new Error('Erreur générique'));
+    await expect(userController.getAllUsers(page, pageSize)).rejects.toThrow('Erreur interne du serveur');
+  });
+
+  // POST
+  it('devrait appeler UserService.createUser avec les bons paramètres et retourner la réponse', async () => {
+    const createUser = { email: 'test@example.com' };
+    const mockedProfile = { auth_id: '1', firstname: '', lastname: '', id: 'aef33960' };
+    const mockedUser = { id: '1', email: 'test@example.com', profile: mockedProfile };
+
+    const spy = jest.spyOn(userService, 'createUser').mockResolvedValue(mockedUser);
+
+    const result = await userController.createUser(createUser);
+
+    expect(spy).toHaveBeenCalledWith(createUser);
+
+    expect(result).toEqual(mockedUser);
+  });
+
+  it('devrait lever une erreur en cas de problème avec UserService', async () => {
+    const mockUser = { email: 'test@example.com' };
+
+    jest.spyOn(userService, 'createUser').mockRejectedValue(new Error('Erreur générique'));
+
+    await expect(userController.createUser(mockUser)).rejects.toThrow('Erreur interne du serveur');
   });
 });

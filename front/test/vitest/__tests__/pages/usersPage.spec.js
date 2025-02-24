@@ -6,11 +6,13 @@ import { useUsersStore } from 'src/stores/users-store.js'
 
 describe('UsersPage.vue', () => {
   let usersStoreMock
+  let wrapper
+  let pinia
 
   beforeEach(() => {
     vi.clearAllMocks()
 
-    const pinia = createTestingPinia({
+    pinia = createTestingPinia({
       createSpy: vi.fn,
       initialState: { usersStore: { users: [] } },
     })
@@ -33,7 +35,13 @@ describe('UsersPage.vue', () => {
       usersStoreMock.totalPages = 2
     })
 
-    mount(UsersPage, {
+    usersStoreMock.addUser = vi.fn().mockResolvedValue({
+      id: 1,
+      email: 'newuser@example.com',
+      profile: { auth_id: '1', firstname: '', id: '2', lastname: '' },
+    })
+
+    wrapper = mount(UsersPage, {
       global: {
         plugins: [pinia],
       },
@@ -45,27 +53,43 @@ describe('UsersPage.vue', () => {
   })
 
   it('should fetch users when page changes', async () => {
-    const pinia = createTestingPinia({ createSpy: vi.fn })
-    const usersStore = useUsersStore()
-
-    usersStore.users = [{ id: 1, email: 'user1@example.com', firstname: 'John', lastname: 'Doe' }]
-    usersStore.totalPages = 2
-
-    const wrapper = mount(UsersPage, {
-      global: {
-        plugins: [pinia],
-      },
-    })
+    usersStoreMock.users = [
+      { id: 1, email: 'user1@example.com', firstname: 'John', lastname: 'Doe' },
+    ]
+    usersStoreMock.totalPages = 2
 
     wrapper.vm.isLoading = false
+    wrapper.vm.totalPages = usersStoreMock.totalPages
 
     await wrapper.vm.$nextTick()
 
     const pagination = wrapper.findComponent({ ref: 'pagination' })
     expect(pagination.exists()).toBe(true)
 
-    await pagination.vm.$emit('update:model-value', 2)
+    await pagination.vm.$emit('update:modelValue', 2)
 
-    expect(usersStore.getUsers).toHaveBeenCalledWith(2, 10)
+    expect(usersStoreMock.getUsers).toHaveBeenCalledWith(2, 10)
+  })
+
+  it('should add user and fetch users after adding', async () => {
+    const data = { email: 'newuser@example.com' }
+    await usersStoreMock.addUser(data)
+
+    expect(usersStoreMock.addUser).toHaveBeenCalledWith(data)
+    expect(usersStoreMock.getUsers).toHaveBeenCalled(1, 10)
+  })
+
+  it('should handle error when adding user fails', async () => {
+    const data = { email: 'invaliduser@example.com' }
+
+    usersStoreMock.addUser = vi.fn().mockRejectedValue(new Error('Failed to add user'))
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await wrapper.vm.addUser(data.email)
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error))
+
+    consoleSpy.mockRestore()
   })
 })
