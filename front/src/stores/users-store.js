@@ -50,5 +50,27 @@ export const useUsersStore = defineStore('users', {
         })
       }
     },
+
+    async updateUser(id, data) {
+      try {
+        const response = await api.put(`/users/${id}`, data)
+
+        Notify.create({
+          message: "L'utilisateur est à jour.",
+          type: 'positive',
+          position: 'top',
+        })
+
+        return response.data
+      } catch (error) {
+        console.error(error)
+
+        Notify.create({
+          message: 'Une erreur est survenue.',
+          type: 'negative',
+          position: 'top',
+        })
+      }
+    },
   },
 })

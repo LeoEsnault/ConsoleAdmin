@@ -15,6 +15,7 @@ describe('UserController', () => {
           useValue: {
             getAllUsers: jest.fn(),
             createUser: jest.fn(),
+            updateUser: jest.fn(),
           },
         },
       ],
@@ -68,5 +69,43 @@ describe('UserController', () => {
     jest.spyOn(userService, 'createUser').mockRejectedValue(new Error('Erreur générique'));
 
     await expect(userController.createUser(mockUser)).rejects.toThrow('Erreur interne du serveur');
+  });
+
+  it('devrait appeler UserService.createUser avec les bons paramètres et retourner la réponse', async () => {
+    const createUser = { email: 'test@example.com' };
+    const mockedProfile = { auth_id: '1', firstname: '', lastname: '', id: 'aef33960' };
+    const mockedUser = { id: '1', email: 'test@example.com', profile: mockedProfile };
+
+    const spy = jest.spyOn(userService, 'createUser').mockResolvedValue(mockedUser);
+
+    const result = await userController.createUser(createUser);
+
+    expect(spy).toHaveBeenCalledWith(createUser);
+
+    expect(result).toEqual(mockedUser);
+  });
+
+  // PUT
+  it('devrait appeler UserService.updateUser avec les bons paramètres et retourner la réponse', async () => {
+    const userId = '1';
+    const mockedProfile = { auth_id: '1', firstname: '', lastname: '', id: 'aef33960' };
+    const mockedUser = { id: '1', email: 'updated@example.com', profile: mockedProfile };
+
+    const spy = jest.spyOn(userService, 'updateUser').mockResolvedValue(mockedUser);
+
+    const result = await userController.updateUser(userId, mockedUser);
+
+    expect(spy).toHaveBeenCalledWith(userId, mockedUser);
+    expect(result).toEqual(mockedUser);
+  });
+
+  it('devrait lever une erreur en cas de problème avec UserService', async () => {
+    const userId = '1';
+    const mockedProfile = { auth_id: '1', firstname: '', lastname: '', id: 'aef33960' };
+    const mockedUser = { id: '1', email: 'updated@example.com', profile: mockedProfile };
+
+    jest.spyOn(userService, 'updateUser').mockRejectedValue(new Error('Erreur générique'));
+
+    await expect(userController.updateUser(userId, mockedUser)).rejects.toThrow('Erreur interne du serveur');
   });
 });

@@ -48,10 +48,11 @@
 import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useUsersStore } from 'src/stores/users-store.js'
-import ManageUser from 'src/components/users/manage-user.vue'
+import ManageUser from 'src/components/users/ManageUser.vue'
 import AddUser from 'src/components/users/AddUser.vue'
 import SkeletonText from 'src/components/skeletons/SkeletonText.vue'
 import SkeletonRange from 'src/components/skeletons/SkeletonRange.vue'
+import { checkEmail } from 'src/utils/helpers'
 
 const $q = useQuasar()
 const isLoading = ref(true)
@@ -80,20 +81,8 @@ const fetchUsers = async () => {
   }
 }
 
-const isValidEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@_]+(\.[^\s@_]+)+$/
-  return emailRegex.test(email)
-}
-
 const addUser = async (email, callback) => {
-  if (!isValidEmail(email.trim())) {
-    $q.notify({
-      message: "L'adresse mail n'est pas valide",
-      type: 'negative',
-      position: 'top',
-    })
-    return
-  }
+  if (!checkEmail(email, $q)) return
 
   try {
     const data = {

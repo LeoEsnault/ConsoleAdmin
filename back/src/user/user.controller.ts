@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Put,
+  Param,
   Query,
   Body,
   ParseIntPipe,
@@ -29,8 +31,7 @@ export class UserController {
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number
   ): Promise<GetUsersResponse> {
     try {
-      const response = await this.userService.getAllUsers(page, pageSize);
-      return response;
+      return await this.userService.getAllUsers(page, pageSize);
     } catch (error) {
       const { message, status } = handleException(error);
       throw new HttpException(message, status);
@@ -41,6 +42,16 @@ export class UserController {
   async createUser(@Body() body: CreateUser): Promise<User> {
     try {
       return await this.userService.createUser(body);
+    } catch (error) {
+      const { message, status } = handleException(error);
+      throw new HttpException(message, status);
+    }
+  }
+
+  @Put(':id')
+  async updateUser(@Param('id') id: string, @Body() body: User): Promise<User> {
+    try {
+      return await this.userService.updateUser(id, body);
     } catch (error) {
       const { message, status } = handleException(error);
       throw new HttpException(message, status);
@@ -58,12 +69,17 @@ export function handleException(error: unknown): { message: string; status: Http
 
   if (
     error instanceof userExceptions.UserCreationException ||
+    error instanceof userExceptions.InvalidEmailFormatException ||
     error instanceof userExceptions.InvalidUserDataException
   ) {
     return { message: error.message, status: HttpStatus.BAD_REQUEST };
   }
 
-  if (error instanceof userExceptions.ProfileCreationException || error instanceof userExceptions.DatabaseException) {
+  if (
+    error instanceof userExceptions.ProfileCreationException ||
+    error instanceof userExceptions.ProfileUpdateException ||
+    error instanceof userExceptions.DatabaseException
+  ) {
     return { message: error.message, status: HttpStatus.INTERNAL_SERVER_ERROR };
   }
 
@@ -71,5 +87,6 @@ export function handleException(error: unknown): { message: string; status: Http
     return { message: error.message, status: HttpStatus.CONFLICT };
   }
 
+  //console.error('Erreur inconnue :', error);
   return { message: 'Erreur interne du serveur', status: HttpStatus.INTERNAL_SERVER_ERROR };
 }

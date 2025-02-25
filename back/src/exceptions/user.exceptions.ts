@@ -35,6 +35,18 @@ export class UserAlreadyExistsException extends ConflictException {
   }
 }
 
+export class InvalidEmailFormatException extends BadRequestException {
+  constructor() {
+    super("L'adresse e-mail fournie n'est pas valide.");
+  }
+}
+
+export class ProfileUpdateException extends InternalServerErrorException {
+  constructor() {
+    super('Erreur lors de la mise à jour du profil');
+  }
+}
+
 export class InvalidUserDataException extends BadRequestException {
   constructor() {
     super('Les données de l’utilisateur sont invalides ou manquantes.');

@@ -135,6 +135,62 @@ export class UserService {
       profile,
     };
   }
+
+  async updateUser(id: string, body: Partial<User>): Promise<User> {
+    const supabase = this.supabaseService.getClient();
+    if (body.email) {
+      if (!isValidEmail(body.email)) {
+        throw new userExceptions.InvalidEmailFormatException();
+      }
+
+      const { data: existingUser, error: getUserError } = await supabase.auth.admin.getUserById(id);
+
+      if (getUserError) {
+        throw new userExceptions.UserNotFoundException();
+      }
+
+      if (existingUser?.user?.email != body.email) {
+        const { error: userError } = await supabase.auth.admin.updateUserById(id, {
+          email: body.email,
+        });
+
+        if (userError) {
+          throw new userExceptions.UserAlreadyExistsException();
+        }
+      }
+    }
+
+    const { data: profile, error: profileError } = await supabase.from('profiles').select().eq('auth_id', id).single();
+
+    if (profileError || !profile) {
+      throw new userExceptions.ProfileNotFoundException();
+    }
+
+    if (body?.profile?.firstname || body?.profile?.lastname) {
+      const { error: profileUpdateError } = await supabase
+        .from('profiles')
+        .update({
+          firstname: body.profile.firstname,
+          lastname: body.profile.lastname,
+        })
+        .eq('id', profile.id);
+
+      if (profileUpdateError) {
+        throw new userExceptions.ProfileUpdateException();
+      }
+    }
+
+    return {
+      id,
+      email: body.email,
+      profile: {
+        id: profile.id,
+        auth_id: id,
+        firstname: body?.profile?.firstname || profile.firstname,
+        lastname: body.profile?.lastname || profile.lastname,
+      },
+    };
+  }
 }
 
 const isValidEmail = (email: string) => {
