@@ -10,6 +10,7 @@ import {
   DefaultValuePipe,
   HttpException,
   HttpStatus,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.service';
@@ -57,6 +58,16 @@ export class UserController {
       throw new HttpException(message, status);
     }
   }
+
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string) {
+    try {
+      return await this.userService.deleteUser(id);
+    } catch (error) {
+      const { message, status } = handleException(error);
+      throw new HttpException(message, status);
+    }
+  }
 }
 
 export function handleException(error: unknown): { message: string; status: HttpStatus } {
@@ -78,7 +89,8 @@ export function handleException(error: unknown): { message: string; status: Http
   if (
     error instanceof userExceptions.ProfileCreationException ||
     error instanceof userExceptions.ProfileUpdateException ||
-    error instanceof userExceptions.DatabaseException
+    error instanceof userExceptions.DatabaseException ||
+    error instanceof userExceptions.UserDeleteException
   ) {
     return { message: error.message, status: HttpStatus.INTERNAL_SERVER_ERROR };
   }

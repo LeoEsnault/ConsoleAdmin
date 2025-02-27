@@ -6,6 +6,7 @@ import { Notify } from 'quasar'
 export const useUsersStore = defineStore('users', {
   state: () => ({
     users: null,
+    loading: false,
   }),
 
   actions: {
@@ -70,6 +71,31 @@ export const useUsersStore = defineStore('users', {
           type: 'negative',
           position: 'top',
         })
+      }
+    },
+
+    async deleteUser(id) {
+      this.loading = true
+      try {
+        const response = await api.delete(`/users/${id}`)
+
+        Notify.create({
+          message: "L'utilisateur a été supprimé.",
+          type: 'positive',
+          position: 'top',
+        })
+
+        return response.data
+      } catch (error) {
+        console.error(error)
+
+        Notify.create({
+          message: 'Une erreur est survenue.',
+          type: 'negative',
+          position: 'top',
+        })
+      } finally {
+        this.loading = false
       }
     },
   },

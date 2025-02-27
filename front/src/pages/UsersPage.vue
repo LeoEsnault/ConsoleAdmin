@@ -17,7 +17,7 @@
         </div>
 
         <div v-else v-for="user in users" :key="user.id" class="q-px-md">
-          <manage-user :user="user" class="col" />
+          <manage-user :user="user" class="col" @deleteUser="refresh()" />
         </div>
       </div>
       <q-pagination ref="pagination" v-if="totalPages > 1 && !isLoading" v-model="currentPage" color="primary"
@@ -35,7 +35,7 @@
         </div>
 
         <div v-else v-for="user in users" :key="user.id" class="q-px-md" style="width: 90vw">
-          <manage-user :user="user" class="col" />
+          <manage-user :user="user" class="col" @deleteUser="refresh()" />
         </div>
       </div>
       <q-pagination ref="pagination" v-if="totalPages > 1 && !isLoading" v-model="currentPage" color="primary"
@@ -94,6 +94,7 @@ const addUser = async (email, callback) => {
     if (typeof callback === 'function') {
       callback(true)
     }
+    currentPage.value = 1
     await fetchUsers()
   } catch (error) {
     if (typeof callback === 'function') {
@@ -101,5 +102,10 @@ const addUser = async (email, callback) => {
     }
     console.error(error)
   }
+}
+
+const refresh = async () => {
+  currentPage.value = 1
+  fetchUsers()
 }
 </script>

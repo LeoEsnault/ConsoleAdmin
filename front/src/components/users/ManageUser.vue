@@ -91,16 +91,22 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <PopUpCardWrapper v-model="showDeleteConfirm" :title="'Confirmation'"
+      :text="'Êtes-vous sûr de vouloir supprimer cet utilisateur ?'" :loading="usersStore.loading"
+      @confirm="deleteUser(user.id)" @update:popUp="showDeleteConfirm = false" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, defineEmits } from 'vue'
 import { useUsersStore } from 'src/stores/users-store.js'
 import { useQuasar } from 'quasar'
 import { checkEmail } from 'src/utils/helpers'
+import PopUpCardWrapper from 'src/components/card/PopUpCardWrapper.vue'
 
 const $q = useQuasar()
+const emit = defineEmits(['deleteUser'])
 const props = defineProps(['user'])
 const usersStore = useUsersStore()
 
@@ -112,6 +118,7 @@ const oUserLastname = ref(null)
 const oUserFirstname = ref(null)
 const isEditingUser = ref(false)
 const popUp = ref(false)
+const showDeleteConfirm = ref(false)
 
 onMounted(async () => {
   userEmail.value = props.user.email
@@ -169,5 +176,12 @@ const save = async (id) => {
 
   isEditingUser.value = false
   popUp.value = false
+}
+
+const deleteUser = async (id) => {
+  const response = await usersStore.deleteUser(id)
+  if (response) {
+    emit('deleteUser')
+  }
 }
 </script>

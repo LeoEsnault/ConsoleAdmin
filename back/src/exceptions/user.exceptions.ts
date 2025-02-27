@@ -53,6 +53,12 @@ export class InvalidUserDataException extends BadRequestException {
   }
 }
 
+export class UserDeleteException extends InternalServerErrorException {
+  constructor(message = "Erreur lors de la suppression de l'user.") {
+    super(message);
+  }
+}
+
 export class DatabaseException extends InternalServerErrorException {
   constructor(message = 'Erreur de base de données.') {
     super(message);

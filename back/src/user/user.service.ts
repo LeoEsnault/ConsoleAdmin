@@ -191,6 +191,22 @@ export class UserService {
       },
     };
   }
+
+  async deleteUser(id: string) {
+    const supabase = this.supabaseService.getClient();
+
+    if (!id) {
+      throw new userExceptions.InvalidUserDataException();
+    }
+
+    const { error } = await supabase.auth.admin.deleteUser(id);
+
+    if (error) {
+      throw new userExceptions.UserDeleteException();
+    }
+
+    return 'ok';
+  }
 }
 
 const isValidEmail = (email: string) => {

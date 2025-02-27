@@ -10,6 +10,7 @@ const mockSupabaseClient = {
       createUser: jest.fn().mockReturnThis(),
       getUserById: jest.fn().mockReturnThis(),
       updateUserById: jest.fn().mockReturnThis(),
+      deleteUser: jest.fn(),
     },
   },
   from: jest.fn().mockReturnThis(),
@@ -32,6 +33,9 @@ describe('UserService', () => {
     }).compile();
 
     userService = moduleRef.get<UserService>(UserService);
+
+    //mockSupabaseClient.auth.admin.deleteUser = jest.fn();
+    jest.spyOn(mockSupabaseService, 'getClient').mockReturnValue(mockSupabaseClient);
   });
 
   // GET
@@ -373,5 +377,34 @@ describe('UserService', () => {
     });
 
     await expect(userService.updateUser(id, mockData)).rejects.toThrow(userExceptions.ProfileUpdateException);
+  });
+
+  // DELETE
+  it('devrait supprimer un utilisateur', async () => {
+    const mockId = '123';
+
+    mockSupabaseClient.auth.admin.deleteUser.mockResolvedValue({
+      error: null,
+    });
+
+    const result = await userService.deleteUser(mockId);
+
+    expect(mockSupabaseClient.auth.admin.deleteUser).toHaveBeenCalledWith(mockId);
+
+    expect(result).toBe('ok');
+  });
+
+  it("devrait lever une exception si l'ID est invalide", async () => {
+    await expect(userService.deleteUser('')).rejects.toThrow(userExceptions.InvalidUserDataException);
+  });
+
+  it('devrait lever une exception si Supabase renvoie une erreur', async () => {
+    const mockId = '123';
+
+    mockSupabaseClient.auth.admin.deleteUser.mockResolvedValue({
+      error: new Error('Erreur Supabase'),
+    });
+
+    await expect(userService.deleteUser(mockId)).rejects.toThrow(userExceptions.UserDeleteException);
   });
 });

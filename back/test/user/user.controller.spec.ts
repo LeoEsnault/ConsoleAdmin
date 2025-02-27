@@ -16,6 +16,7 @@ describe('UserController', () => {
             getAllUsers: jest.fn(),
             createUser: jest.fn(),
             updateUser: jest.fn(),
+            deleteUser: jest.fn(),
           },
         },
       ],
@@ -40,7 +41,7 @@ describe('UserController', () => {
     expect(result).toEqual(mockUsersResponse);
   });
 
-  it('devrait lever une erreur en cas de problème avec UserService', async () => {
+  it('devrait lever une erreur en cas de problème avec UserService.getAllUsers', async () => {
     const page = 1;
     const pageSize = 10;
 
@@ -63,7 +64,7 @@ describe('UserController', () => {
     expect(result).toEqual(mockedUser);
   });
 
-  it('devrait lever une erreur en cas de problème avec UserService', async () => {
+  it('devrait lever une erreur en cas de problème avec UserService.createUser', async () => {
     const mockUser = { email: 'test@example.com' };
 
     jest.spyOn(userService, 'createUser').mockRejectedValue(new Error('Erreur générique'));
@@ -99,7 +100,7 @@ describe('UserController', () => {
     expect(result).toEqual(mockedUser);
   });
 
-  it('devrait lever une erreur en cas de problème avec UserService', async () => {
+  it('devrait lever une erreur en cas de problème avec UserService.updateUser', async () => {
     const userId = '1';
     const mockedProfile = { auth_id: '1', firstname: '', lastname: '', id: 'aef33960' };
     const mockedUser = { id: '1', email: 'updated@example.com', profile: mockedProfile };
@@ -107,5 +108,25 @@ describe('UserController', () => {
     jest.spyOn(userService, 'updateUser').mockRejectedValue(new Error('Erreur générique'));
 
     await expect(userController.updateUser(userId, mockedUser)).rejects.toThrow('Erreur interne du serveur');
+  });
+
+  // DELETE
+  it('devrait appeler UserService.deleteUser avec les bons paramètres et retourner "ok', async () => {
+    const mockId = '123';
+
+    const spy = jest.spyOn(userService, 'deleteUser').mockResolvedValue('ok');
+
+    const result = await userController.deleteUser(mockId);
+
+    expect(spy).toHaveBeenCalledWith(mockId);
+    expect(result).toEqual('ok');
+  });
+
+  it('devrait lever une erreur en cas de problème avec UserService.deleteUser', async () => {
+    const mockId = '123';
+
+    jest.spyOn(userService, 'deleteUser').mockRejectedValue(new Error('Erreur générique'));
+
+    await expect(userController.deleteUser(mockId)).rejects.toThrow('Erreur interne du serveur');
   });
 });

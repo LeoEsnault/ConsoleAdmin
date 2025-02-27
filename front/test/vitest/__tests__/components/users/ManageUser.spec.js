@@ -3,6 +3,7 @@ import ManageUser from 'src/components/users/ManageUser.vue'
 import { useUsersStore } from 'src/stores/users-store.js'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
+import PopUpCard from 'src/components/card/PopUpCard.vue'
 
 describe('ManageUser Component', () => {
   let wrapper
@@ -34,6 +35,7 @@ describe('ManageUser Component', () => {
       global: {
         plugins: [pinia],
       },
+      //components: { PopUpCard },
     })
   })
 
@@ -141,5 +143,42 @@ describe('ManageUser Component', () => {
     expect(wrapper.vm.userFirstname).toBe(mockedUser.profile.firstname)
     expect(wrapper.vm.isEditingUser).toBe(false)
     expect(wrapper.vm.popUp).toBe(false)
+  })
+
+  // DELETE
+  it('should open PopUpCard on click on delete button', async () => {
+    const deleteButton = wrapper.find('#delete-button')
+    expect(deleteButton.exists()).toBe(true)
+
+    expect(wrapper.vm.showDeleteConfirm).toBe(false)
+
+    await deleteButton.trigger('click')
+
+    expect(wrapper.vm.showDeleteConfirm).toBe(true)
+  })
+
+  it('should call deleteUser when click on "Valider"', async () => {
+    usersStoreMock.deleteUser = vi.fn()
+
+    wrapper.vm.showDeleteConfirm = true
+    await wrapper.vm.$nextTick()
+
+    await wrapper.findComponent(PopUpCard).vm.$emit('confirm')
+
+    expect(usersStoreMock.deleteUser).toHaveBeenCalledWith(mockedUser.id)
+    expect(usersStoreMock.deleteUser).toHaveBeenCalledTimes(1)
+  })
+
+  it('should close PopUpCard on cancel', async () => {
+    usersStoreMock.deleteUser = vi.fn()
+
+    wrapper.vm.showDeleteConfirm = true
+    await wrapper.vm.$nextTick()
+
+    await wrapper.findComponent(PopUpCard).vm.$emit('update:popUp')
+
+    expect(wrapper.vm.showDeleteConfirm).toBe(false)
+
+    expect(usersStoreMock.deleteUser).not.toHaveBeenCalled()
   })
 })
