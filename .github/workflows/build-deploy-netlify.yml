@@ -30,7 +30,7 @@ jobs:
       - name: Build Quasar App
         working-directory: front
         run: |
-          yarn add -g @quasar/cli
+          yarn global add @quasar/cli
           quasar build
 
       - name: Deploy to Netlify
