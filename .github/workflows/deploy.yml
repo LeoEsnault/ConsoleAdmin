@@ -23,4 +23,4 @@ jobs:
         run: cd back
 
       - name: Deploy to Railway
-        run: railway up --service=${{ env.SVC_ID }}
+        run: railway up --service=${{ vars.RAILWAY_SERVICE_ID_1 }}
