@@ -1,0 +1,42 @@
+name: Build & Deploy to Netlify
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Run Tests and Coverage"]
+    types:
+      - completed
+
+jobs:
+  build-deploy:
+    environment: recette
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        working-directory: front
+        run: npm install
+
+      - name: Build Quasar App
+        working-directory: front
+        run: |
+          npm install -g @quasar/cli
+          quasar build
+
+      - name: Deploy to Netlify
+        uses: netlify/actions/cli@master
+        with:
+          args: deploy --prod --dir=front/dist/spa
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID_1 }}
