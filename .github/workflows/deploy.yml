@@ -1,0 +1,26 @@
+name: Deploy Back to Railway
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Run Tests and Coverage"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    container: ghcr.io/railwayapp/cli:latest
+    env:
+      SVC_ID: ${{ vars.RAILWAY_SERVICE_ID_1 }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Move to backend folder
+        run: cd back
+
+      - name: Deploy to Railway
+        run: railway up --service=$SVC_ID
