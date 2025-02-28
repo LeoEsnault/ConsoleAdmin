@@ -34,6 +34,7 @@ export class UserController {
     try {
       return await this.userService.getAllUsers(page, pageSize);
     } catch (error) {
+      console.error(error)
       const { message, status } = handleException(error);
       throw new HttpException(message, status);
     }
@@ -44,6 +45,7 @@ export class UserController {
     try {
       return await this.userService.createUser(body);
     } catch (error) {
+      console.error(error)
       const { message, status } = handleException(error);
       throw new HttpException(message, status);
     }
@@ -54,6 +56,7 @@ export class UserController {
     try {
       return await this.userService.updateUser(id, body);
     } catch (error) {
+      console.error(error)
       const { message, status } = handleException(error);
       throw new HttpException(message, status);
     }
@@ -64,6 +67,7 @@ export class UserController {
     try {
       return await this.userService.deleteUser(id);
     } catch (error) {
+      console.error(error)
       const { message, status } = handleException(error);
       throw new HttpException(message, status);
     }
