@@ -20,8 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Move to backend folder
-        run: cd back
-
       - name: Deploy to Railway
+        working-directory: back
         run: railway up --service=$SVC_ID
