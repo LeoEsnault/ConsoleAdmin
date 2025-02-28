@@ -11,6 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: recette
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     container: ghcr.io/railwayapp/cli:latest
     env:
@@ -23,4 +24,4 @@ jobs:
         run: cd back
 
       - name: Deploy to Railway
-        run: railway up --service=${{ vars.RAILWAY_SERVICE_ID_1 }}
+        run: railway up --service=$SVC_ID
