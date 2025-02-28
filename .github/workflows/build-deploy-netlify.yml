@@ -25,12 +25,12 @@ jobs:
 
       - name: Install Dependencies
         working-directory: front
-        run: npm install
+        run: yarn
 
       - name: Build Quasar App
         working-directory: front
         run: |
-          npm install -g @quasar/cli
+          yarn add -g @quasar/cli
           quasar build
 
       - name: Deploy to Netlify
