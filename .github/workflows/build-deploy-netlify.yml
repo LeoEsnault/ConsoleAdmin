@@ -32,6 +32,11 @@ jobs:
         run: |
           yarn global add @quasar/cli
           quasar build
+        env:
+          BASE_URL: ${{ vars.BASE_URL }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID_1 }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
       - name: Deploy to Netlify
         uses: netlify/actions/cli@master
