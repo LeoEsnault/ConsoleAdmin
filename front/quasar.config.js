@@ -47,7 +47,8 @@ export default defineConfig((ctx) => {
       // publicPath: '/',
       // analyze: true,
        env: {
-         BASE_URL: ctx.dev ? "http://localhost:3000" : "https://staging.api.console.heriade.fr"
+         BASE_URL: ctx.dev ? "http://localhost:3000" : "https://staging.api.console.heriade.fr",
+         FRONT_URL: ctx.dev ? "http://localhost:9000" : "https://staging.console.heriade.fr"
        },
       // rawDefine: {}
       // ignorePublicFolder: true,
