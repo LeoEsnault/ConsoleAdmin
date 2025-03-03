@@ -12,7 +12,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: recette
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success' }}
     container: ghcr.io/railwayapp/cli:latest
     env:
       SVC_ID: ${{ vars.RAILWAY_SERVICE_ID_1 }}

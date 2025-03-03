@@ -12,7 +12,7 @@ jobs:
   build-deploy:
     environment: recette
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' &&  github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout Repository
