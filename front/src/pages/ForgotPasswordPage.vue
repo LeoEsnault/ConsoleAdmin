@@ -63,14 +63,16 @@ const $q = useQuasar();
 
 const router = useRouter()
 
+const frontUrl = computed(() => {
+  return process.env.FRONT_URL
+})
 // Envoie le lien pour le reset du mdp
 async function sendRequest() {
   loading.value = true;
 
   try {
-    console.log(process.env.FRONT_URL)
     await supabase.auth.resetPasswordForEmail(email.value, {
-      redirectTo: `${process.env.FRONT_URL}/reset-password?`, // changer ici au besoin mais garder '?'
+      redirectTo: `${frontUrl.value}/reset-password?`,
     });
       $q.notify({
         message: "Un lien de réinitialisation a été envoyé sur votre e-mail.",
