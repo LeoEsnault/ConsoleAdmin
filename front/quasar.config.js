@@ -4,7 +4,6 @@
 import { defineConfig } from '#q-app/wrappers'
 
 export default defineConfig((ctx) => {
-  require('dotenv').config({ path: `.env` })
   
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
