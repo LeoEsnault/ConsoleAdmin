@@ -30,14 +30,14 @@ const handleMouseOut = () => {
 
       <!-- Modern Sidebar -->
       <q-drawer v-model="drawer" :mini="miniState" @mouseover="handleMouseOver" @mouseout="handleMouseOut" :width="280"
-                :breakpoint="500" bordered class="modern-drawer" :mini-width="70" behavior="desktop" show-if-above>
+        :breakpoint="500" bordered class="modern-drawer" :mini-width="70" behavior="desktop" show-if-above>
         <!-- Logout Section -->
 
         <LogoutButton />
       </q-drawer>
 
       <q-page-container>
-        <router-view :key="refreshKey" />
+        <router-view />
       </q-page-container>
     </q-layout>
 
@@ -47,7 +47,7 @@ const handleMouseOut = () => {
 
       <!-- Mobile Drawer -->
       <q-drawer v-model="mobileDrawerOpen" side="left" overlay behavior="mobile" :breakpoint="500" class="modern-drawer"
-                bordered>
+        bordered>
 
         <!-- Mobile Logout Section -->
         <MobileLogoutButton />
@@ -78,8 +78,6 @@ const handleMouseOut = () => {
 </template>
 
 <style scoped>
-
-
 .modern-footer {
   background: white;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
@@ -101,5 +99,4 @@ const handleMouseOut = () => {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   height: 60px;
 }
-
 </style>

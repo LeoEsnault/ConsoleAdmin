@@ -6,7 +6,7 @@
           <q-icon name="power_settings_new" color="red-9" size="19px" class="iconLogout" />
         </div>
       </q-item-section>
-      <q-item-section class="text-negative text-weight-medium">
+      <q-item-section class="text-warning text-weight-medium">
         Déconnexion
       </q-item-section>
     </q-item>
@@ -14,7 +14,6 @@
 </template>
 
 <style scoped>
-
 .iconLogout {
   box-shadow: 0 1px 2px #0000000d;
   border-radius: .5rem;

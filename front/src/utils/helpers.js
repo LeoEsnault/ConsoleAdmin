@@ -8,7 +8,6 @@ export const checkEmail = (email, $q) => {
     $q.notify({
       message: "L'adresse mail n'est pas valide",
       type: 'negative',
-      position: 'top',
     })
     return false
   }

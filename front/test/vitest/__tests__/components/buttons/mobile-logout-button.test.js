@@ -4,13 +4,12 @@ import LogoutButton from 'src/components/buttons/MobileLogoutButton.vue'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { useRouter } from 'vue-router'
 
-
 vi.mock('src/stores/auth-store.js', () => ({
-  useAuthStore: vi.fn()
+  useAuthStore: vi.fn(),
 }))
 
 vi.mock('vue-router', () => ({
-  useRouter: vi.fn()
+  useRouter: vi.fn(),
 }))
 
 describe('LogoutButton.vue', () => {
@@ -20,11 +19,11 @@ describe('LogoutButton.vue', () => {
   beforeEach(() => {
     // Réinitialiser les mocks avant chaque test
     authStoreMock = {
-      logout: vi.fn().mockResolvedValue({ type: 'success', message: 'Déconnexion réussie' })
+      logout: vi.fn().mockResolvedValue({ type: 'success', message: 'Déconnexion réussie' }),
     }
 
     routerMock = {
-      push: vi.fn()
+      push: vi.fn(),
     }
 
     // Mocker les implémentations des dépendances
@@ -44,12 +43,14 @@ describe('LogoutButton.vue', () => {
 
     // Vérifier que la redirection vers /login a bien eu lieu
     expect(routerMock.push).toHaveBeenCalledWith('/login')
-
   })
 
-  it('doit afficher une notification en cas d\'erreur lors de la déconnexion', async () => {
+  it("doit afficher une notification en cas d'erreur lors de la déconnexion", async () => {
     // Mocker un échec de la déconnexion
-    authStoreMock.logout.mockResolvedValueOnce({ type: 'error', message: 'Échec de la déconnexion' })
+    authStoreMock.logout.mockResolvedValueOnce({
+      type: 'error',
+      message: 'Échec de la déconnexion',
+    })
 
     const wrapper = mount(LogoutButton)
 
@@ -59,18 +60,17 @@ describe('LogoutButton.vue', () => {
 
     // Vérifier que la notification est affichée avec le bon message
     expect(routerMock.push).toBeCalledTimes(0)
-
   })
 
   it('doit afficher le bon texte pour le bouton de déconnexion', () => {
     const wrapper = mount(LogoutButton)
 
     // Vérifier le texte du bouton de déconnexion
-    const buttonText = wrapper.find('.text-negative')
+    const buttonText = wrapper.find('.text-warning')
     expect(buttonText.text()).toBe('Déconnexion')
   })
 
-  it('doit avoir la bonne classe CSS sur l\'élément iconLogout', () => {
+  it("doit avoir la bonne classe CSS sur l'élément iconLogout", () => {
     const wrapper = mount(LogoutButton)
 
     // Vérifier que l'icône de déconnexion a la bonne classe CSS

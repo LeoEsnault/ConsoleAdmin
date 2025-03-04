@@ -84,12 +84,6 @@ describe('UsersPage.vue', () => {
 
     usersStoreMock.addUser = vi.fn().mockRejectedValue(new Error('Failed to add user'))
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    await wrapper.vm.addUser(data.email)
-
-    expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error))
-
-    consoleSpy.mockRestore()
+    await expect(wrapper.vm.addUser(data.email)).rejects.toThrow('Failed to add user')
   })
 })

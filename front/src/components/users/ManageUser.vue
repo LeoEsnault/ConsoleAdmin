@@ -22,13 +22,13 @@
       <div class="col text-center">
         <div v-if="!isEditingUser">
           <q-btn id="edit-user-button" icon="edit" round size="sm" flat color="secondary" @click="editUser()"></q-btn>
-          <q-btn id="delete-button" icon="delete" round size="sm" flat color="negative"
+          <q-btn id="delete-button" icon="delete" round size="sm" flat color="primary"
             @click="showDeleteConfirm = true"></q-btn>
         </div>
         <div v-else>
           <q-btn id="save-user" icon="check" round size="sm" flat color="secondary" :disable="!isUpdated"
             @click="save(user.id)"></q-btn>
-          <q-btn id="cancel-update" icon="cancel" round size="sm" flat color="purple" @click="reset"></q-btn>
+          <q-btn id="cancel-update" icon="cancel" round size="sm" flat color="accent" @click="reset"></q-btn>
         </div>
       </div>
     </div>
@@ -54,7 +54,7 @@
                 <div>
                   <q-btn id="edit-user-button-mobile" icon="edit" round size="sm" flat color="secondary"
                     @click="openPopup()"></q-btn>
-                  <q-btn id="delete-button-mobile" icon="delete" round size="sm" flat color="negative"
+                  <q-btn id="delete-button-mobile" icon="delete" round size="sm" flat color="primary"
                     @click="showDeleteConfirm = true"></q-btn>
                 </div>
               </div>
@@ -86,7 +86,7 @@
           <div class="text-center">
             <q-btn id="save-user" icon="check" round size="md" flat color="secondary" :disable="!isUpdated"
               @click="save(user.id)"></q-btn>
-            <q-btn id="cancel-update" icon="cancel" round size="md" flat color="purple" @click="reset"></q-btn>
+            <q-btn id="cancel-update" icon="cancel" round size="md" flat color="cancel" @click="reset"></q-btn>
           </div>
         </q-card-section>
       </q-card>
@@ -166,9 +166,13 @@ const save = async (id) => {
     },
   }
 
-  const updatedUser = await usersStore.updateUser(id, data)
+  const response = await usersStore.updateUser(id, data)
+  $q.notify({
+    type: response?.type,
+    message: response?.message
+  })
 
-  if (!updatedUser) return
+  if (!response?.data) return
 
   oUserEmail.value = userEmail.value
   oUserLastname.value = userLastname.value
@@ -180,8 +184,13 @@ const save = async (id) => {
 
 const deleteUser = async (id) => {
   const response = await usersStore.deleteUser(id)
-  if (response) {
+  if (response?.data) {
     emit('deleteUser')
   }
+
+  $q.notify({
+    type: response?.type,
+    message: response?.message
+  })
 }
 </script>

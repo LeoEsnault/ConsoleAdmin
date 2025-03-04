@@ -84,24 +84,27 @@ const fetchUsers = async () => {
 const addUser = async (email, callback) => {
   if (!checkEmail(email, $q)) return
 
-  try {
-    const data = {
-      email: email,
-    }
-    const addedUser = await usersStore.addUser(data)
+  const data = {
+    email: email,
+  }
+  const response = await usersStore.addUser(data)
 
-    if (!addedUser) return
+  if (!response.data) {
+    if (typeof callback === 'function') {
+      callback(false)
+    }
+  } else {
     if (typeof callback === 'function') {
       callback(true)
     }
     currentPage.value = 1
     await fetchUsers()
-  } catch (error) {
-    if (typeof callback === 'function') {
-      callback(false)
-    }
-    console.error(error)
   }
+
+  $q.notify({
+    type: response.type,
+    message: response.message
+  })
 }
 
 const refresh = async () => {

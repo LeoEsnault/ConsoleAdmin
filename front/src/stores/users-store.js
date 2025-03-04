@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { api } from 'boot/axios'
 import qs from 'qs'
-import { Notify } from 'quasar'
 
 export const useUsersStore = defineStore('users', {
   state: () => ({
@@ -34,21 +33,27 @@ export const useUsersStore = defineStore('users', {
       try {
         const response = await api.post(`/users`, data)
 
-        Notify.create({
-          message: "L'utilisateur a été ajouté.",
+        return {
           type: 'positive',
-          position: 'top',
-        })
-
-        return response.data
+          message: "L'utilisateur a été ajouté.",
+          data: response.data,
+        }
       } catch (error) {
         console.error(error)
+        let message
 
-        Notify.create({
-          message: 'Une erreur est survenue.',
+        if (
+          error?.response?.data?.message === 'Un utilisateur avec cette adresse e-mail existe déjà.'
+        ) {
+          message = "L'utilisateur avec cet identifiant existe déjà. Merci d'en choisir un autre."
+        } else {
+          message = 'Une erreur est survenue.'
+        }
+
+        return {
           type: 'negative',
-          position: 'top',
-        })
+          message,
+        }
       }
     },
 
@@ -56,21 +61,18 @@ export const useUsersStore = defineStore('users', {
       try {
         const response = await api.put(`/users/${id}`, data)
 
-        Notify.create({
-          message: "L'utilisateur est à jour.",
+        return {
           type: 'positive',
-          position: 'top',
-        })
-
-        return response.data
+          message: "L'utilisateur est à jour.",
+          data: response.data,
+        }
       } catch (error) {
         console.error(error)
 
-        Notify.create({
-          message: 'Une erreur est survenue.',
+        return {
           type: 'negative',
-          position: 'top',
-        })
+          message: 'Une erreur est survenue.',
+        }
       }
     },
 
@@ -79,21 +81,18 @@ export const useUsersStore = defineStore('users', {
       try {
         const response = await api.delete(`/users/${id}`)
 
-        Notify.create({
-          message: "L'utilisateur a été supprimé.",
+        return {
           type: 'positive',
-          position: 'top',
-        })
-
-        return response.data
+          message: "L'utilisateur a été supprimé.",
+          data: response.data,
+        }
       } catch (error) {
         console.error(error)
 
-        Notify.create({
+        return {
+          type: 'positive',
           message: 'Une erreur est survenue.',
-          type: 'negative',
-          position: 'top',
-        })
+        }
       } finally {
         this.loading = false
       }
