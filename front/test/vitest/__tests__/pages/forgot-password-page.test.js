@@ -56,7 +56,7 @@ describe('ForgotPassword.vue', () => {
     // Vérifier que la méthode resetPasswordForEmail a été appelée avec l'email
     expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
       'utilisateur@email.com',
-      { redirectTo: `${process.env.FRONT_URL}/reset-password?` }
+      { redirectTo: `${process.env.FRONT_URL}/reset-password` }
     )
 
     // Vérifier que la redirection vers la page de connexion a eu lieu
