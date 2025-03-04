@@ -4,6 +4,8 @@
 import { defineConfig } from '#q-app/wrappers'
 
 export default defineConfig((ctx) => {
+  require('dotenv').config({ path: `.env` })
+  
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -47,10 +49,10 @@ export default defineConfig((ctx) => {
       // publicPath: '/',
       // analyze: true,
        env: {
-         BASE_URL: ctx.dev ? "http://localhost:3000" : "https://staging.api.console.heriade.fr",
-         FRONT_URL: ctx.dev ? "http://localhost:9000" : "https://staging.console.heriade.fr",
-         SUPABASE_URL: ctx.dev ? process.env.SUPABASE_URL : "https://naonyaeqxavyccmjeoqu.supabase.co",
-         SUPABASE_KEY: ctx.dev ? process.env.SUPABASE_KEY : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hb255YWVxeGF2eWNjbWplb3F1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzOTI0NjEsImV4cCI6MjA1NDk2ODQ2MX0.WNgviBtxwqHxi6YKqWVBkekYnSEu4Bfa2YjOYhYf45E"
+         BASE_URL: process.env.BASE_URL,
+         FRONT_URL: process.env.FRONT_URL,
+         SUPABASE_URL: process.env.SUPABASE_URL,
+         SUPABASE_KEY: process.env.SUPABASE_KEY
        },
       // rawDefine: {}
       // ignorePublicFolder: true,
