@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { supabase } from 'src/supabase/supabase';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router'
