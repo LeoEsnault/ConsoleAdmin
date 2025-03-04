@@ -192,7 +192,7 @@ export const useAuthStore = defineStore('auth', {
         console.error(error)
         return {
           type: 'error',
-          message: 'Une erreur est survenue.'
+          message: 'Une erreur est survenue. Veuillez réessayer.'
         }
       } finally {
         this.loading = false
