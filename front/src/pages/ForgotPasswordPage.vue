@@ -68,6 +68,7 @@ async function sendRequest() {
   loading.value = true;
 
   try {
+    console.log(process.env.FRONT_URL)
     await supabase.auth.resetPasswordForEmail(email.value, {
       redirectTo: `${process.env.FRONT_URL}/reset-password?`, // changer ici au besoin mais garder '?'
     });
