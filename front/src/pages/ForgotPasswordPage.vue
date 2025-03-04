@@ -72,7 +72,7 @@ async function sendRequest() {
 
   try {
     await supabase.auth.resetPasswordForEmail(email.value, {
-      redirectTo: `${frontUrl.value}/reset-password?`,
+      redirectTo: `${frontUrl.value}/reset-password`,
     });
       $q.notify({
         message: "Un lien de réinitialisation a été envoyé sur votre e-mail.",
