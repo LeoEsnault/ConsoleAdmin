@@ -128,7 +128,6 @@ export const useAuthStore = defineStore('auth', {
     },
     async login(email, password) {
       try {
-        console.log(email, password)
         this.loading = true
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
