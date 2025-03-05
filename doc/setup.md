@@ -27,7 +27,6 @@ Exécuter dans l'ordre les requêtes `SQL` du dossier [supabase](../supabase/).
 CORS_ORIGINS=http://localhost:9000
 SUPABASE_URL=https://my.supabase.co
 SUPABASE_SERVICE_ROLE=321.321.321
-SUPABASE_KEY=123.123.123
 ```
 
 - front
