@@ -34,6 +34,6 @@ SUPABASE_SERVICE_ROLE=321.321.321
 ```env
 BASE_URL=http://localhost:3000
 FRONT_URL=http://localhost:9000
-SUPABASE_URL=https://mu.supabase.co
+SUPABASE_URL=https://my.supabase.co
 SUPABASE_KEY=123.123.123
 ```
