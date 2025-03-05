@@ -1,9 +1,10 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
-import { defineConfig } from '#q-app/wrappers'
 import './env.js'
+import { defineConfig } from '#q-app/wrappers'
 
-export default defineConfig((/*ctx*/) => {
+export default defineConfig((ctx) => {
+
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -47,10 +48,10 @@ export default defineConfig((/*ctx*/) => {
       // publicPath: '/',
       // analyze: true,
       env: {
-        BASE_URL: process.env.BASE_URL,
-        FRONT_URL: process.env.FRONT_URL,
-        SUPABASE_URL: process.env.SUPABASE_URL,
-        SUPABASE_KEY: process.env.SUPABASE_KEY,
+        BASE_URL: ctx.dev ? "http://localhost:3000" : process.env.BASE_URL,
+        FRONT_URL: ctx.dev ? "http://localhost:9000" : process.env.FRONT_URL,
+        SUPABASE_URL: ctx.dev ? "https://naonyaeqxavyccmjeoqu.supabase.co" : process.env.SUPABASE_URL,
+        SUPABASE_KEY: ctx.dev ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hb255YWVxeGF2eWNjbWplb3F1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzOTI0NjEsImV4cCI6MjA1NDk2ODQ2MX0.WNgviBtxwqHxi6YKqWVBkekYnSEu4Bfa2YjOYhYf45E" : process.env.SUPABASE_KEY,
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

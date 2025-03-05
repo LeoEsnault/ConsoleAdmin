@@ -14,6 +14,13 @@
 </template>
 
 <style scoped>
+.mobile-logout-section {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+}
 .iconLogout {
   box-shadow: 0 1px 2px #0000000d;
   border-radius: .5rem;

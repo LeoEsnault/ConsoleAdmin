@@ -1,7 +1,7 @@
 <template>
   <q-page class="column flex justify-center">
     <!-- DESKTOP -->
-    <div class="desktop-only column q-px-xl q-gutter-y-md">
+    <div v-if="$q.screen.gt.sm" class="column q-px-xl q-gutter-y-md">
       <AddUser @click="addUser" />
 
       <div class="q-gutter-y-md">
@@ -26,7 +26,7 @@
     </div>
 
     <!-- MOBILE -->
-    <div class="mobile-only column content-center q-pa-sm">
+    <div v-else class="column content-center q-pa-sm">
       <AddUser @click="addUser" />
 
       <div class="q-gutter-y-md">
