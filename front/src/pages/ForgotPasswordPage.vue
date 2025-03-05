@@ -2,7 +2,7 @@
   <div class="bg-image">
     <div class="logo">
       <q-img
-        src="public/assets/LogoHeriadeCouleur.png"
+        src="/assets/LogoHeriadeCouleur.png"
         fit="contain"
         style="height: 7rem; z-index: 50"
         class="q-mt-lg"
