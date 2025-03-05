@@ -11,6 +11,14 @@ Se créer un compte dans supabase, et récupérer les informations suivantes :
 
 ![Supabase API Settings](./assets/supabase_api_settings.PNG)
 
+### Création des base de données
+
+Exécuter dans l'ordre les requêtes `SQL` du dossier [supabase](../supabase/).
+
+### Initialisation des données
+
+**TODO**
+
 ### Variables d'environnement
 
 - back
