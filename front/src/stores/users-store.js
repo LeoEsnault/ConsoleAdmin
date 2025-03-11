@@ -27,6 +27,7 @@ export const useUsersStore = defineStore('users', {
         console.error('Erreur lors de la récupération des données :', error)
         return []
       }
+      
     },
 
     async addUser(data) {

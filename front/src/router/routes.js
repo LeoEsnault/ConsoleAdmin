@@ -3,8 +3,9 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/UsersPage.vue') }
+    children: [  
+      { path: '', component: () => import('pages/UsersPage.vue') }, 
+      { path: '/profil-user', component: () => import('pages/ProfilePage.vue') }
     ],
     meta: { requiresAuth: true }
   },
@@ -54,4 +55,4 @@ routes.forEach(route => {
   }
 });
 
-export default routes
+export default routes 

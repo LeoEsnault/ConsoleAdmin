@@ -23,6 +23,7 @@ erDiagram
         uuid id PK
         string email
         datetime last_signed_at
+        E.164 phone
     }
 
     PROFILES }|--|| AUTH: "has one"
