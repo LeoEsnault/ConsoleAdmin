@@ -4,7 +4,8 @@
 erDiagram
     PROFILES {
         uuid id PK
-        uuid auth_id FK
+        uuid user_id FK
+        uuid enterprise_id FK
         string firstname
         string lastname
     }
@@ -26,7 +27,14 @@ erDiagram
         E.164 phone
     }
 
+    ENTERPRISE {
+        uuid id PK
+        string name
+        datetime created_at
+    }
+
     PROFILES }|--|| AUTH: "has one"
+    PROFILES }|--|| ENTERPRISE: "has one"
     USER_ROLES }|--|| AUTH: "assigns roles"
     USER_ROLES }|--|| APP_ROLE : "defines roles"
 ```

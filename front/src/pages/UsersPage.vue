@@ -1,9 +1,10 @@
 <template>
   <q-page class="column flex justify-center">
+    <SelectEnterprise id="select-enterprise" @update="refresh" />
+
     <!-- DESKTOP -->
     <div v-if="$q.screen.gt.sm" class="column q-px-xl q-gutter-y-md">
       <AddUser @click="addUser" />
-
       <div class="q-gutter-y-md">
         <div class="bg-grey-11 row q-py-md q-px-md rounded-borders text-caption">
           <span class="col title">Email</span>
@@ -53,11 +54,13 @@ import AddUser from 'src/components/users/AddUser.vue'
 import SkeletonText from 'src/components/skeletons/SkeletonText.vue'
 import SkeletonRange from 'src/components/skeletons/SkeletonRange.vue'
 import { checkEmail } from 'src/utils/helpers'
+import SelectEnterprise from 'src/components/users/SelectEnterprise.vue'
 
 const $q = useQuasar()
 const isLoading = ref(true)
 const users = ref([])
 const usersStore = useUsersStore()
+
 let currentPage = ref(1)
 let usersPerPage = 10
 const totalPages = ref(10)
@@ -68,11 +71,10 @@ onMounted(async () => {
 
 const fetchUsers = async () => {
   isLoading.value = true
-
   try {
     const response = await usersStore.getUsers(currentPage.value, usersPerPage)
-    users.value = response?.users
-    totalPages.value = response?.totalPages
+    users.value = response?.users || {}
+    totalPages.value = response?.totalPages || null
   } catch (error) {
     console.error('Erreur lors de la récupération des données :', error)
     return []
@@ -89,7 +91,7 @@ const addUser = async (email, callback) => {
   }
   const response = await usersStore.addUser(data)
 
-  if (!response.data) {
+  if (!response?.data) {
     if (typeof callback === 'function') {
       callback(false)
     }

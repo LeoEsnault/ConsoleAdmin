@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import LoginPage from '@/pages/LoginUserPage.vue'
 import { useAuthStore } from 'src/stores/auth-store.js'
+import { useEnterpriseStore } from 'src/stores/enterprise-store.js'
 import { createTestingPinia } from '@pinia/testing'
 
 vi.mock('@supabase/supabase-js', () => ({
@@ -32,6 +33,7 @@ vi.mock('vue-router', () => ({
 describe('LoginPage', () => {
   let wrapper
   let authStore
+  let enterpriseStore
 
   beforeEach(() => {
     const pinia = createTestingPinia()
@@ -43,6 +45,8 @@ describe('LoginPage', () => {
       message: 'authentification réussie',
       data: { role_name: 'SuperAdmin' }
     })
+
+    enterpriseStore = useEnterpriseStore(pinia)
 
     // Montage du composant avec Pinia mocké
     wrapper = mount(LoginPage, {
@@ -76,6 +80,8 @@ describe('LoginPage', () => {
 
     // Vérifier que la méthode fetchUserRole est appelée avec un ID utilisateur
     expect(authStore.fetchUserRole).toHaveBeenCalled(1)
-  })
 
+    // Vérifier que la méthode fetchUserRole est appelée avec un ID utilisateur
+    expect(enterpriseStore.getEnterprise).toHaveBeenCalled(1)
+  })
 })

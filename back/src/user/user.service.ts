@@ -1,8 +1,10 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { v4 as uuidv4 } from 'uuid';
 import { PostgrestError } from '@supabase/supabase-js';
 import * as userExceptions from '../exceptions/user.exceptions';
+import * as enterpriseExceptions from '../exceptions/enterprise.exceptions';
+import * as userFacade from './user.facade';
+import * as roleExceptions from '../exceptions/role.exceptions';
 
 export interface User {
   id: string;
@@ -11,90 +13,60 @@ export interface User {
 }
 
 export interface Profile {
-  auth_id: string;
+  user_id: string;
   id: string;
   firstname: string;
   lastname: string;
+  enterprise_id?: string;
 }
 
 export interface CreateUser {
   email: string;
+  enterprise: string;
 }
 
 @Injectable()
 export class UserService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  async getAllUsers(page: number, pageSize: number) {
-    if (page < 1 || pageSize < 1) {
-      throw new BadRequestException('page et pageSize doivent être supérieurs à 0');
+  async getUserEnterprise(userId: string) {
+    if (!userId) {
+      throw new BadRequestException('Missing userId');
     }
 
-    const supabase = this.supabaseService.getClient();
+    const { error: getUserError } = await userFacade.getUserById(userId);
 
-    // get user.auth
-    const { data: users, error: usersError } = await supabase.auth.admin.listUsers({
-      page: page,
-      perPage: pageSize,
-    });
-
-    if (usersError) {
+    if (getUserError) {
       throw new userExceptions.UserNotFoundException();
     }
 
-    const userIds = users.users.map((user) => user.id);
-    // get profiles
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('auth_id, id, firstname, lastname')
-      .in('auth_id', userIds);
+    const { data: profile, error: profilesError } = await userFacade.getProfiles(userId);
 
-    if (profilesError) {
+    if (profilesError || !profile) {
       throw new userExceptions.ProfileNotFoundException();
     }
 
-    // match profiles // auth.users
-    const usersWithProfiles: User[] = users.users.map((user) => {
-      const userProfile = profiles.find((profile) => profile.auth_id === user.id);
-      return { ...user, profile: userProfile };
-    });
+    const { data: enterprise, error: enterpriseError } = await userFacade.getEnterprise(profile.enterprise_id);
 
-    // create pagination
-    const { count: totalUsers, error: totalUsersError } = await supabase
-      .from('profiles')
-      .select('auth_id', { count: 'exact' });
-
-    if (totalUsersError) {
-      throw new InternalServerErrorException(
-        `Erreur lors de la récupération de tous les utilisateurs : ${totalUsersError.message}`
-      );
+    if (enterpriseError) {
+      return {};
     }
 
-    if (totalUsers === null) {
-      throw new Error("Impossible de récupérer le nombre total d'utilisateurs");
-    }
-
-    const totalUsersCount = totalUsers ?? 0;
-    const totalPages = Math.ceil((totalUsersCount || 0) / pageSize);
-
-    return {
-      users: usersWithProfiles || [],
-      totalPages,
-    };
+    return enterprise || {};
   }
 
   async createUser(body: CreateUser): Promise<User> {
-    const supabase = this.supabaseService.getClient();
-
-    if (!body.email || !isValidEmail(body.email)) {
+    if (!body.email || !isValidEmail(body.email) || !body.enterprise) {
       throw new userExceptions.InvalidUserDataException();
     }
 
-    const uuid: string = uuidv4();
-    const { data: user, error: authError } = await supabase.auth.admin.createUser({
-      email: body.email,
-      password: uuid,
-    });
+    const { data: enterprise, error: enterpriseError } = await userFacade.getEnterprise(body.enterprise);
+
+    if (enterpriseError) {
+      throw new enterpriseExceptions.EnterpriseNotFoundException();
+    }
+
+    const { data: user, error: authError } = await userFacade.createUser(body.email);
 
     if (authError) {
       if (authError.code === 'email_exists') {
@@ -108,18 +80,14 @@ export class UserService {
       throw new userExceptions.UserCreationException();
     }
 
+    const { error: roleError } = await userFacade.createRole(user.user.id);
+
+    if (roleError) {
+      throw new roleExceptions.RoleNotFoundException();
+    }
+
     const { data: profile, error: profileError }: { data: Profile | null; error: PostgrestError | null } =
-      await supabase
-        .from('profiles')
-        .insert([
-          {
-            auth_id: user.user.id,
-            firstname: '',
-            lastname: '',
-          },
-        ])
-        .select()
-        .single();
+      await userFacade.createProfile(user.user.id, enterprise.id);
 
     if (profileError) {
       throw new userExceptions.ProfileCreationException();
@@ -137,22 +105,19 @@ export class UserService {
   }
 
   async updateUser(id: string, body: Partial<User>): Promise<User> {
-    const supabase = this.supabaseService.getClient();
     if (body.email) {
       if (!isValidEmail(body.email)) {
         throw new userExceptions.InvalidEmailFormatException();
       }
 
-      const { data: existingUser, error: getUserError } = await supabase.auth.admin.getUserById(id);
+      const { data: existingUser, error: getUserError } = await userFacade.getUserById(id);
 
       if (getUserError) {
         throw new userExceptions.UserNotFoundException();
       }
 
       if (existingUser?.user?.email != body.email) {
-        const { error: userError } = await supabase.auth.admin.updateUserById(id, {
-          email: body.email,
-        });
+        const { error: userError } = await userFacade.updateUserById(id, body.email);
 
         if (userError) {
           throw new userExceptions.UserAlreadyExistsException();
@@ -160,22 +125,31 @@ export class UserService {
       }
     }
 
-    const { data: profile, error: profileError } = await supabase.from('profiles').select().eq('auth_id', id).single();
+    const { data: profile, error: profileError } = await userFacade.getProfiles(id);
 
     if (profileError || !profile) {
       throw new userExceptions.ProfileNotFoundException();
     }
 
     if (body?.profile?.firstname || body?.profile?.lastname) {
-      const { error: profileUpdateError } = await supabase
-        .from('profiles')
-        .update({
-          firstname: body.profile.firstname,
-          lastname: body.profile.lastname,
-        })
-        .eq('id', profile.id);
+      const { error: profileUpdateError } = await userFacade.updateProfile(
+        profile.id,
+        body.profile.lastname,
+        body.profile.firstname
+      );
 
       if (profileUpdateError) {
+        throw new userExceptions.ProfileUpdateException();
+      }
+    }
+
+    if (body?.profile?.enterprise_id) {
+      const { error: enterpriseError } = await userFacade.updateProfileEnterprise(
+        profile.id,
+        body.profile.enterprise_id
+      );
+
+      if (enterpriseError) {
         throw new userExceptions.ProfileUpdateException();
       }
     }
@@ -185,21 +159,29 @@ export class UserService {
       email: body.email,
       profile: {
         id: profile.id,
-        auth_id: id,
+        user_id: id,
         firstname: body?.profile?.firstname || profile.firstname,
-        lastname: body.profile?.lastname || profile.lastname,
+        lastname: body?.profile?.lastname || profile.lastname,
       },
     };
   }
 
   async deleteUser(id: string) {
-    const supabase = this.supabaseService.getClient();
-
     if (!id) {
       throw new userExceptions.InvalidUserDataException();
     }
 
-    const { error } = await supabase.auth.admin.deleteUser(id);
+    const { data: role, error: roleError } = await userFacade.getRole(id);
+
+    if (roleError) {
+      throw new roleExceptions.RoleNotFoundException();
+    }
+
+    if (role?.role === 'super_admin') {
+      throw new userExceptions.UserDeleteException();
+    }
+
+    const { error } = await userFacade.deleteUser(id);
 
     if (error) {
       throw new userExceptions.UserDeleteException();

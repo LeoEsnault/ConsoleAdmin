@@ -48,12 +48,12 @@ export default defineConfig((ctx) => {
       // publicPath: '/',
       // analyze: true,
 
-       env: {
-         BASE_URL: ctx.dev ? "http://localhost:3000" : process.env.BASE_URL,
-         FRONT_URL: ctx.dev ? "" : process.env.FRONT_URL,
-         SUPABASE_URL: ctx.dev ? "https://lmzswedsrufajidbcykm.supabase.co" : process.env.SUPABASE_URL,
-         SUPABASE_KEY: ctx.dev ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtenN3ZWRzcnVmYWppZGJjeWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NzE3MDUsImV4cCI6MjA1MjM0NzcwNX0.iaGi8h2hbYEuVKq7QISZvPhUwzR9uMPpxx_m_gL5LXQ" : process.env.SUPABASE_KEY
-       },
+      env: {
+        BASE_URL: ctx.dev ? "http://localhost:3000" : process.env.BASE_URL,
+        FRONT_URL: ctx.dev ? "" : process.env.FRONT_URL,
+        SUPABASE_URL: ctx.dev ? "https://lmzswedsrufajidbcykm.supabase.co" : process.env.SUPABASE_URL,
+        SUPABASE_KEY: ctx.dev ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtenN3ZWRzcnVmYWppZGJjeWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NzE3MDUsImV4cCI6MjA1MjM0NzcwNX0.iaGi8h2hbYEuVKq7QISZvPhUwzR9uMPpxx_m_gL5LXQ" : process.env.SUPABASE_KEY
+      },
 
       // rawDefine: {}
       // ignorePublicFolder: true,

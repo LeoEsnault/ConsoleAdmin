@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
 import { UserService } from '../../src/user/user.service';
 import { SupabaseService } from '../../src/supabase/supabase.service';
 import * as userExceptions from '../../src/exceptions/user.exceptions';
+import * as enterpriseExceptions from '../../src/exceptions/enterprise.exceptions';
+import * as roleExceptions from '../../src/exceptions/role.exceptions';
+import * as userFacade from '../../src/user/user.facade';
 
 const mockSupabaseClient = {
   auth: {
@@ -13,16 +17,27 @@ const mockSupabaseClient = {
       deleteUser: jest.fn(),
     },
   },
-  from: jest.fn().mockReturnThis(),
-  select: jest.fn().mockReturnThis(),
-  eq: jest.fn().mockReturnThis(),
-  single: jest.fn().mockReturnThis(),
-  update: jest.fn().mockReturnThis(),
 };
 
 const mockSupabaseService = {
   getClient: jest.fn().mockReturnValue(mockSupabaseClient),
 };
+
+jest.mock('../../src/user/user.facade', () => ({
+  listUsers: jest.fn(),
+  getUserById: jest.fn(),
+  getProfiles: jest.fn(),
+  getEnterprise: jest.fn(),
+  createPagination: jest.fn(),
+  createUser: jest.fn(),
+  createRole: jest.fn(),
+  createProfile: jest.fn(),
+  updateUserById: jest.fn(),
+  updateProfile: jest.fn(),
+  updateProfileEnterprise: jest.fn(),
+  getRole: jest.fn(),
+  deleteUser: jest.fn(),
+}));
 
 describe('UserService', () => {
   let userService: UserService;
@@ -31,380 +46,334 @@ describe('UserService', () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [UserService, { provide: SupabaseService, useValue: mockSupabaseService }],
     }).compile();
-
     userService = moduleRef.get<UserService>(UserService);
-
-    //mockSupabaseClient.auth.admin.deleteUser = jest.fn();
-    jest.spyOn(mockSupabaseService, 'getClient').mockReturnValue(mockSupabaseClient);
   });
 
-  // GET
-  it('devrait appeler Supabase avec les bons paramètres et retourner les utilisateurs', async () => {
-    const page = 1;
-    const pageSize = 10;
-
-    const mockUsers = { users: [{ id: '1', email: 'john@example.com' }] };
-    const mockProfiles = [{ auth_id: '1', id: '101', firstname: 'John', lastname: 'Doe' }];
-
-    // Mock de la récupération des utilisateurs via auth
-    mockSupabaseClient.auth.admin.listUsers.mockResolvedValue({ data: mockUsers, error: null });
-
-    // Mock de la récupération des profils avec un bon chaînage
-    mockSupabaseClient.from.mockImplementation((tableName) => {
-      if (tableName === 'profiles') {
-        return {
-          select: jest.fn().mockImplementation((columns: string, options?: { count?: string }) => {
-            if (options?.count === 'exact') {
-              return Promise.resolve({ data: null, count: 1, error: null });
-            }
-            return {
-              in: jest.fn().mockResolvedValue({ data: mockProfiles, error: null }),
-            };
-          }),
-        };
-      }
-      return { select: jest.fn().mockResolvedValue({ data: null, count: 1, error: null }) };
-    });
-
-    const result = await userService.getAllUsers(page, pageSize);
-
-    expect(mockSupabaseClient.auth.admin.listUsers).toHaveBeenCalledWith({ page, perPage: pageSize });
-    expect(mockSupabaseClient.from).toHaveBeenCalledWith('profiles');
-    expect(result).toEqual({
-      users: [
-        {
-          id: '1',
-          email: 'john@example.com',
-          profile: { auth_id: '1', id: '101', firstname: 'John', lastname: 'Doe' },
-        },
-      ],
-      totalPages: 1,
-    });
-  });
-
-  it('devrait appeler Supabase et lever une erreur si Supabase renvoie une erreur dans la listes uttilisateurs', async () => {
-    mockSupabaseClient.auth.admin.listUsers.mockResolvedValue({
-      data: null,
-      error: { message: 'Database error' },
-    });
-
-    await expect(userService.getAllUsers(1, 10)).rejects.toThrow('Utilisateur(s) non trouvé(s)');
-  });
-
-  // POST
-  it('devrait créer un user et renvoie un objet user (avec son profil)', async () => {
-    const mockUser = {
-      email: 'test@example.com',
-    };
-
-    mockSupabaseClient.auth.admin.createUser.mockResolvedValue({
-      data: { user: { id: '123', email: 'test@example.com' } },
-      error: null,
-    });
-
-    mockSupabaseClient.from.mockImplementation((tableName) => {
-      if (tableName === 'profiles') {
-        return {
-          insert: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({
-                data: { auth_id: '123', firstname: '', lastname: '' },
-                error: null,
-              }),
-            }),
-          }),
-        };
-      }
-      return { insert: jest.fn() };
-    });
-
-    const result = await userService.createUser(mockUser);
-
-    expect(result).toHaveProperty('id');
-    expect(result).toHaveProperty('email', 'test@example.com');
-    expect(result).toHaveProperty('profile');
-  });
-
-  it("devrait lever une InvalidUserDataException si l'email est invalide", async () => {
-    const mockUser = {
-      email: 'invalid-email',
-    };
-
-    await expect(userService.createUser(mockUser)).rejects.toThrow(userExceptions.InvalidUserDataException);
-  });
-
-  it("devrait lever une UserAlreadyExistsException si l'utilisateur existe déjà", async () => {
-    const mockUser = {
-      email: 'test@example.com',
-    };
-
-    mockSupabaseClient.auth.admin.createUser.mockResolvedValue({
-      data: null,
-      error: { code: 'email_exists', message: 'Email already in use' },
-    });
-
-    await expect(userService.createUser(mockUser)).rejects.toThrow(userExceptions.UserAlreadyExistsException);
-  });
-
-  it("devrait lever une UserCreationException si la création de l'utilisateur échoue pour une autre raison", async () => {
-    const mockUser = {
-      email: 'test@example.com',
-    };
-
-    mockSupabaseClient.auth.admin.createUser.mockResolvedValue({
-      data: null,
-      error: { code: 'other_error', message: 'Unknown error' },
-    });
-
-    await expect(userService.createUser(mockUser)).rejects.toThrow(userExceptions.UserCreationException);
-  });
-
-  it("devrait lever une UserCreationException si l'utilisateur est null après la création", async () => {
-    const mockUser = {
-      email: 'test@example.com',
-    };
-
-    mockSupabaseClient.auth.admin.createUser.mockResolvedValue({
-      data: { user: null },
-      error: null,
-    });
-
-    await expect(userService.createUser(mockUser)).rejects.toThrowError(userExceptions.UserCreationException);
-  });
-
-  it('devrait lever une ProfileCreationException si la création du profil échoue', async () => {
-    const mockUser = {
-      email: 'test@example.com',
-    };
-
-    mockSupabaseClient.auth.admin.createUser.mockResolvedValue({
-      data: { user: { id: '123', email: 'test@example.com' } },
-      error: null,
-    });
-
-    mockSupabaseClient.from.mockImplementation((tableName) => {
-      if (tableName === 'profiles') {
-        return {
-          insert: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({
-                data: null,
-                error: { message: 'Profile creation failed' },
-              }),
-            }),
-          }),
-        };
-      }
-      return { insert: jest.fn() };
-    });
-
-    await expect(userService.createUser(mockUser)).rejects.toThrow(userExceptions.ProfileCreationException);
-  });
-
-  it("devrait lever une ProfileNotFoundException si le profil n'est pas retourné après insertion", async () => {
-    const mockUser = {
-      email: 'test@example.com',
-    };
-
-    mockSupabaseClient.auth.admin.createUser.mockResolvedValue({
-      data: { user: { id: '123', email: 'test@example.com' } },
-      error: null,
-    });
-
-    mockSupabaseClient.from.mockImplementation((tableName) => {
-      if (tableName === 'profiles') {
-        return {
-          insert: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({
-                data: null,
-                error: null,
-              }),
-            }),
-          }),
-        };
-      }
-      return { insert: jest.fn() };
-    });
-
-    await expect(userService.createUser(mockUser)).rejects.toThrowError(userExceptions.ProfileNotFoundException);
-  });
-
-  // PUT
-  it('devrait mettre à jour un utilisateur et renvoyait un objet user (avec son profil)', async () => {
+  describe('GET UserEnterprise', () => {
     const mockId = '123';
-    const mockData = {
+    const mockProfile = { id: 'profile-123', user_id: mockId, enterprise_id: '456' };
+    const mockEnterprise = {
+      id: 'ent-123',
+      name: 'enter-prise',
+    };
+
+    beforeEach(async () => {
+      (userFacade.getUserById as jest.Mock).mockResolvedValue({ data: { id: mockId }, error: null });
+      (userFacade.getProfiles as jest.Mock).mockResolvedValue({ data: mockProfile, error: null });
+      (userFacade.getEnterprise as jest.Mock).mockResolvedValue({ data: mockEnterprise, error: null });
+    });
+
+    it('devrait retourner les informations de l’entreprise si tout est valide', async () => {
+      const result = await userService.getUserEnterprise(mockId);
+
+      expect(userFacade.getUserById).toHaveBeenCalledWith(mockId);
+      expect(userFacade.getProfiles).toHaveBeenCalledWith(mockId);
+      expect(userFacade.getEnterprise).toHaveBeenCalledWith(mockProfile.enterprise_id);
+
+      expect(result).toEqual(mockEnterprise);
+    });
+
+    it('doit lever une BadRequestException si userId est manquant', async () => {
+      const mockId = '';
+      await expect(userService.getUserEnterprise(mockId)).rejects.toThrow(BadRequestException);
+    });
+
+    it('doit lever une UserNotFoundException si l’utilisateur n’existe pas', async () => {
+      (userFacade.getUserById as jest.Mock).mockResolvedValue({ data: null, error: 'User not found' });
+      await expect(userService.getUserEnterprise(mockId)).rejects.toThrow(userExceptions.UserNotFoundException);
+      expect(userFacade.getUserById).toHaveBeenCalledWith(mockId);
+    });
+
+    it('doit lever une ProfileNotFoundException si le profil n’existe pas', async () => {
+      (userFacade.getProfiles as jest.Mock).mockResolvedValue({ data: null, error: 'Profil not found' });
+
+      await expect(userService.getUserEnterprise(mockId)).rejects.toThrow(userExceptions.ProfileNotFoundException);
+      expect(userFacade.getProfiles).toHaveBeenCalledWith(mockId);
+    });
+
+    it('doit retourner un objet vide si l’entreprise n’est pas trouvée', async () => {
+      (userFacade.getEnterprise as jest.Mock).mockResolvedValue({ data: null, error: 'Enterprise not found' });
+
+      const result = await userService.getUserEnterprise(mockId);
+
+      expect(userFacade.getEnterprise).toHaveBeenCalledWith(mockProfile.enterprise_id);
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('POST', () => {
+    const mockBody = {
+      email: 'test@example.com',
+      enterprise: 'ent-123',
+    };
+
+    const mockUser = {
+      id: 'user-123',
+      email: 'test@example.com',
+      enterprise: 'ent-123',
+    };
+
+    const mockProfile = {
+      user_id: 'user-123',
+      lastname: 'profile-last',
+      firstname: 'profile-first',
+      enterprise_id: 'ent-123',
+    };
+
+    const mockEnterprise = {
+      id: 'ent-123',
+      name: 'enter-prise',
+    };
+
+    beforeEach(async () => {
+      (userFacade.getEnterprise as jest.Mock).mockResolvedValue({ data: mockEnterprise, error: null });
+      (userFacade.createUser as jest.Mock).mockResolvedValue({ data: { user: mockUser }, error: null });
+      (userFacade.createRole as jest.Mock).mockResolvedValue({ error: null });
+      (userFacade.createProfile as jest.Mock).mockResolvedValue({
+        data: mockProfile,
+        error: null,
+      });
+    });
+
+    it('devrait créer un user et renvoie un objet user (avec son profil)', async () => {
+      const result = await userService.createUser(mockBody);
+
+      expect(userFacade.getEnterprise).toHaveBeenCalledWith(mockBody.enterprise);
+      expect(userFacade.createUser).toHaveBeenCalledWith(mockBody.email);
+      expect(userFacade.createRole).toHaveBeenCalledWith(mockUser.id);
+      expect(userFacade.createProfile).toHaveBeenCalledWith(mockUser.id, mockEnterprise.id);
+
+      expect(result).toEqual({
+        id: mockUser.id,
+        email: mockUser.email,
+        profile: mockProfile,
+      });
+    });
+
+    it("devrait lever une InvalidUserDataException si l'email est invalide", async () => {
+      const mockBody = {
+        email: 'invalid-email',
+        enterprise: '123',
+      };
+
+      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.InvalidUserDataException);
+    });
+
+    it("devrait lever une EnterpriseNotFoundException si l'entreprise n'est pas trouvé", async () => {
+      const mockBody = {
+        email: 'test@example.com',
+        enterprise: 'invalid',
+      };
+
+      (userFacade.getEnterprise as jest.Mock).mockResolvedValue({ data: null, error: { message: 'Not found' } });
+
+      await expect(userService.createUser(mockBody)).rejects.toThrow(enterpriseExceptions.EnterpriseNotFoundException);
+
+      expect(userFacade.getEnterprise).toHaveBeenCalledWith(mockBody.enterprise);
+    });
+
+    it("devrait lever une UserAlreadyExistsException si l'utilisateur existe déjà", async () => {
+      (userFacade.createUser as jest.Mock).mockResolvedValue({
+        data: null,
+        error: { code: 'email_exists', message: 'Email already in use' },
+      });
+
+      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.UserAlreadyExistsException);
+
+      expect(userFacade.createUser).toHaveBeenCalledWith(mockBody.email);
+    });
+
+    it("devrait lever une UserCreationException si la création de l'utilisateur échoue pour une autre raison", async () => {
+      (userFacade.createUser as jest.Mock).mockResolvedValue({
+        data: null,
+        error: { code: 'other_error', message: 'Unknown error' },
+      });
+
+      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.UserCreationException);
+
+      expect(userFacade.createUser).toHaveBeenCalledWith(mockBody.email);
+    });
+
+    it("devrait lever une UserCreationException si l'utilisateur est null après la création", async () => {
+      (userFacade.createUser as jest.Mock).mockResolvedValue({
+        data: { user: null },
+        error: null,
+      });
+
+      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.UserCreationException);
+
+      expect(userFacade.createUser).toHaveBeenCalledWith(mockBody.email);
+    });
+
+    it('devrait lever une RoleNotFoundException si la création du rôle échoue', async () => {
+      (userFacade.createRole as jest.Mock).mockResolvedValue({
+        data: null,
+        error: { message: "Rôle de l'utilisateur non trouvé." },
+      });
+
+      await expect(userService.createUser(mockBody)).rejects.toThrow(roleExceptions.RoleNotFoundException);
+
+      expect(userFacade.createRole).toHaveBeenCalledWith(mockUser.id);
+    });
+
+    it('devrait lever une ProfileCreationException si la création du profil échoue', async () => {
+      (userFacade.createProfile as jest.Mock).mockResolvedValue({
+        data: null,
+        error: { message: 'Profile creation failed' },
+      });
+
+      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.ProfileCreationException);
+
+      expect(userFacade.createProfile).toHaveBeenCalledWith(mockUser.id, mockEnterprise.id);
+    });
+
+    it("devrait lever une ProfileNotFoundException si le profil n'est pas retourné après insertion", async () => {
+      (userFacade.createProfile as jest.Mock).mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.ProfileNotFoundException);
+
+      expect(userFacade.createProfile).toHaveBeenCalledWith(mockUser.id, mockEnterprise.id);
+    });
+  });
+
+  describe('PUT', () => {
+    const mockId = '123';
+    const mockProfileId = 'profile-123';
+    const mockBody = {
       email: 'test@example.com',
       profile: {
-        id: 'profile-123',
-        auth_id: '123',
+        id: mockProfileId,
+        user_id: '123',
         lastname: 'Doe',
         firstname: 'John',
+        enterprise_id: 'ent-123',
       },
     };
 
-    mockSupabaseClient.auth.admin.getUserById.mockResolvedValue({
-      data: { user: { email: 'old@example.com' } },
-      error: null,
+    beforeEach(async () => {
+      (userFacade.getUserById as jest.Mock).mockResolvedValue({ data: { id: mockId }, error: null });
+      (userFacade.updateUserById as jest.Mock).mockResolvedValue({ error: null });
+      (userFacade.getProfiles as jest.Mock).mockResolvedValue({ data: { id: mockProfileId }, error: null });
+      (userFacade.updateProfile as jest.Mock).mockResolvedValue({ error: null });
+      (userFacade.updateProfileEnterprise as jest.Mock).mockResolvedValue({ error: null });
     });
 
-    mockSupabaseClient.auth.admin.updateUserById.mockResolvedValue({
-      data: { user: { id: mockId, email: mockData.email } },
-      error: null,
-    });
+    it('devrait mettre à jour un utilisateur et renvoyait un objet user (avec son profil)', async () => {
+      const result = await userService.updateUser(mockId, mockBody);
 
-    // profiles
-    mockSupabaseClient.from.mockImplementation(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: { id: 'profile-123', auth_id: mockId, firstname: 'OldFirst', lastname: 'OldLast' },
-        error: null,
-      }),
-    }));
+      expect(userFacade.getUserById).toHaveBeenCalledWith(mockId);
+      expect(userFacade.updateUserById).toHaveBeenCalledWith(mockId, mockBody.email);
+      expect(userFacade.getProfiles).toHaveBeenCalledWith(mockId);
+      expect(userFacade.updateProfile).toHaveBeenCalledWith(
+        mockProfileId,
+        mockBody.profile.lastname,
+        mockBody.profile.firstname
+      );
+      expect(userFacade.updateProfileEnterprise).toHaveBeenCalledWith(mockProfileId, mockBody.profile.enterprise_id);
 
-    mockSupabaseClient.update.mockResolvedValue({ error: null });
-
-    const result = await userService.updateUser(mockId, mockData);
-
-    expect(result).toEqual({
-      id: mockId,
-      email: mockData.email,
-      profile: {
-        id: 'profile-123',
-        auth_id: mockId,
-        firstname: mockData.profile.firstname,
-        lastname: mockData.profile.lastname,
-      },
-    });
-
-    expect(mockSupabaseClient.auth.admin.updateUserById).toHaveBeenCalledWith(mockId, { email: mockData.email });
-  });
-
-  it("devrait lever InvalidEmailFormatException si l'email est invalide", async () => {
-    const id = 'user-123';
-    const body = { email: 'invalid-email' };
-
-    await expect(userService.updateUser(id, body)).rejects.toThrow(userExceptions.InvalidEmailFormatException);
-  });
-
-  it("devrait lever UserNotFoundException si l'utilisateur n'existe pas", async () => {
-    const id = 'user-123';
-    const body = { email: 'new@example.com' };
-
-    mockSupabaseService.getClient.mockReturnValue({
-      auth: {
-        admin: {
-          getUserById: jest.fn().mockResolvedValue({ data: null, error: { message: 'User not found' } }),
+      expect(result).toEqual({
+        id: mockId,
+        email: mockBody.email,
+        profile: {
+          id: mockProfileId,
+          user_id: mockId,
+          lastname: mockBody.profile.lastname,
+          firstname: mockBody.profile.firstname,
         },
-      },
+      });
     });
 
-    await expect(userService.updateUser(id, body)).rejects.toThrow(userExceptions.UserNotFoundException);
-  });
+    it("devrait lever InvalidEmailFormatException si l'email est invalide", async () => {
+      const mockBody = { email: 'invalid-email' };
 
-  it("devrait lever UserAlreadyExistsException si l'email est déjà pris", async () => {
-    const id = 'user-123';
-    const body = { email: 'new@example.com' };
-
-    mockSupabaseService.getClient.mockReturnValue({
-      auth: {
-        admin: {
-          getUserById: jest.fn().mockResolvedValue({ data: { user: { email: 'old@example.com' } }, error: null }),
-          updateUserById: jest.fn().mockResolvedValue({ error: { message: 'Email already in use' } }),
-        },
-      },
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(
+        userExceptions.InvalidEmailFormatException
+      );
     });
 
-    await expect(userService.updateUser(id, body)).rejects.toThrow(userExceptions.UserAlreadyExistsException);
-  });
+    it("devrait lever UserNotFoundException si l'utilisateur n'existe pas", async () => {
+      (userFacade.getUserById as jest.Mock).mockResolvedValue({ data: null, error: { message: 'User not found' } });
 
-  it('devrait lever ProfileNotFoundException si le profil est introuvable', async () => {
-    const id = 'user-123';
-    const body = { email: 'new@example.com' };
-
-    mockSupabaseService.getClient.mockReturnValue({
-      auth: {
-        admin: {
-          getUserById: jest.fn().mockResolvedValue({ data: { user: { email: 'old@example.com' } }, error: null }),
-          updateUserById: jest.fn().mockResolvedValue({ error: null }),
-        },
-      },
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: { message: 'Profile not found' } }),
-      }),
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.UserNotFoundException);
     });
 
-    await expect(userService.updateUser(id, body)).rejects.toThrow(userExceptions.ProfileNotFoundException);
+    it("devrait lever UserAlreadyExistsException si l'email est déjà pris", async () => {
+      (userFacade.updateUserById as jest.Mock).mockResolvedValue({ error: { message: 'Email already in use' } });
+
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.UserAlreadyExistsException);
+    });
+
+    it('devrait lever ProfileNotFoundException si le profil est introuvable', async () => {
+      (userFacade.getProfiles as jest.Mock).mockResolvedValue({ data: null, error: { message: 'Profile not found' } });
+
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.ProfileNotFoundException);
+    });
+
+    it('devrait lever ProfileUpdateException si la mise à jour du profil échoue avec nom et prénom', async () => {
+      (userFacade.updateProfile as jest.Mock).mockResolvedValue({ error: { message: 'Profile update failed' } });
+
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.ProfileUpdateException);
+    });
+
+    it("devrait lever ProfileUpdateException si la mise à jour du profil échoue avec l'entreprise", async () => {
+      (userFacade.updateProfileEnterprise as jest.Mock).mockResolvedValue({
+        error: { message: 'Profile update failed' },
+      });
+
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.ProfileUpdateException);
+    });
   });
 
-  it('devrait lever ProfileUpdateException si la mise à jour du profil échoue', async () => {
-    const id = 'user-123';
-    const mockData = {
-      email: 'new@example.com',
-      profile: {
-        id: 'profile-123',
-        auth_id: id,
-        firstname: 'NewFirstName',
-        lastname: 'NewLastName',
-      },
+  describe('DELETE', () => {
+    const mockId = '123';
+    const mockUserRole = {
+      id: 'role-123',
+      user_id: 'user-123',
+      role: 'utilisateur',
     };
 
-    mockSupabaseService.getClient.mockReturnValue({
-      auth: {
-        admin: {
-          getUserById: jest.fn().mockResolvedValue({
-            data: { user: { email: 'old@example.com' } },
-            error: null,
-          }),
-          updateUserById: jest.fn().mockResolvedValue({ error: null }),
-        },
-      },
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { id: 'profile-123', auth_id: id },
-          error: null,
-        }),
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({ error: { message: 'Profile update failed' } }),
-        }),
-      }),
+    const mockSuperAdminRole = {
+      id: 'role-456',
+      user_id: 'user-456',
+      role: 'super_admin',
+    };
+
+    it('devrait supprimer un utilisateur', async () => {
+      (userFacade.getRole as jest.Mock).mockResolvedValue({ data: mockUserRole, error: null });
+      (userFacade.deleteUser as jest.Mock).mockResolvedValue({ error: null });
+
+      const result = await userService.deleteUser(mockId);
+      expect(userFacade.getRole).toHaveBeenCalledWith(mockId);
+      expect(userFacade.deleteUser).toHaveBeenCalledWith(mockId);
+
+      expect(result).toBe('ok');
     });
 
-    await expect(userService.updateUser(id, mockData)).rejects.toThrow(userExceptions.ProfileUpdateException);
-  });
-
-  // DELETE
-  it('devrait supprimer un utilisateur', async () => {
-    const mockId = '123';
-
-    mockSupabaseClient.auth.admin.deleteUser.mockResolvedValue({
-      error: null,
+    it("devrait lever une exception si l'ID est invalide", async () => {
+      const mockId = '';
+      await expect(userService.deleteUser(mockId)).rejects.toThrow(userExceptions.InvalidUserDataException);
     });
 
-    const result = await userService.deleteUser(mockId);
+    it('devrait lever une exception si les rôle est introuvable', async () => {
+      (userFacade.getRole as jest.Mock).mockResolvedValue({
+        data: null,
+        error: { message: "Rôle de l'utilisateur non trouvé" },
+      });
 
-    expect(mockSupabaseClient.auth.admin.deleteUser).toHaveBeenCalledWith(mockId);
-
-    expect(result).toBe('ok');
-  });
-
-  it("devrait lever une exception si l'ID est invalide", async () => {
-    await expect(userService.deleteUser('')).rejects.toThrow(userExceptions.InvalidUserDataException);
-  });
-
-  it('devrait lever une exception si Supabase renvoie une erreur', async () => {
-    const mockId = '123';
-
-    mockSupabaseClient.auth.admin.deleteUser.mockResolvedValue({
-      error: new Error('Erreur Supabase'),
+      await expect(userService.deleteUser(mockId)).rejects.toThrow(roleExceptions.RoleNotFoundException);
     });
 
-    await expect(userService.deleteUser(mockId)).rejects.toThrow(userExceptions.UserDeleteException);
+    it('devrait lever une exception si le user a un rôle super_admin', async () => {
+      (userFacade.getRole as jest.Mock).mockResolvedValue({ data: mockSuperAdminRole, error: null });
+      await expect(userService.deleteUser(mockId)).rejects.toThrow(userExceptions.UserDeleteException);
+    });
+
+    it('devrait lever une exception si Supabase renvoie une erreur', async () => {
+      (userFacade.deleteUser as jest.Mock).mockResolvedValue({ error: { message: 'Erreur mocké' } });
+      await expect(userService.deleteUser(mockId)).rejects.toThrow(userExceptions.UserDeleteException);
+    });
   });
 });
