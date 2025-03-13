@@ -70,3 +70,9 @@ export class DatabaseException extends InternalServerErrorException {
     super(message);
   }
 }
+export class InvalidFormatException extends BadRequestException {
+  constructor(message?: string) {
+    super(message)
+  }
+}
+

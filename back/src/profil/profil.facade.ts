@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SupabaseService } from '../supabase/supabase.service'; 
+import { InvalidUserDataException } from '../exceptions/user.exceptions';
 
 @Injectable()
 export class ProfilFacade {
@@ -11,11 +12,13 @@ export class ProfilFacade {
 
     const { data: user} = await supabase.auth.admin.getUserById(userId)
 
-    const { data} = await supabase
+    const { data } = await supabase
+    
       .from('profiles')
       .select('*')
       .eq('auth_id', userId)
       .single();
+
     return { data, user };
   };
 
@@ -31,11 +34,13 @@ export class ProfilFacade {
       email,
       phone
     } )
+
     const { data: updatedUser} = await supabase
       .from('profiles')
       .update({lastname, firstname})
       .eq('auth_id', userId)
       .single();
+
     return { updatedUser, user };
   }
 }

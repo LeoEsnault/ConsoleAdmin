@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { supabase } from 'src/supabase/supabase';
-import { Notify } from 'quasar';
 import { api } from 'src/boot/axios';
 
 
@@ -48,7 +47,6 @@ export const useProfilStore = defineStore('profil', {
     
       } catch (error) {
         console.error("Erreur inattendue :", error.message);
-        Notify.create({ message: "Une erreur est survenue.", type: "negative" });
       }
     },
     async updateProfil(data) {

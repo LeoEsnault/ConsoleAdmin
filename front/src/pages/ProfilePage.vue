@@ -7,19 +7,19 @@
         >
           <div class="row" id ='inputProfile0'>
             <p class="col-4 q-my-auto text-blue">Nom</p>
-            <q-input v-model="lastName" color="blue" outlined dense type="text" class="col-8" ></q-input>
+            <q-input v-model="lastName" color="blue" outlined dense type="text" class="col-8" maxlength="40" ></q-input>
           </div>
           <div class="row" id ='inputProfile1'>
             <p class="col-4 q-my-auto text-blue">Prénom</p>
-            <q-input v-model="firstName" color="blue" outlined dense type="text" class="col-8"></q-input>
+            <q-input v-model="firstName" color="blue" outlined dense type="text" class="col-8" maxlength="40"></q-input>
           </div>
           <div class="row">
             <p class="col-4 q-my-auto text-blue">Email</p>
-            <q-input v-model="email" color="blue" outlined dense type="email" class="col-8"></q-input>
+            <q-input v-model="email" color="blue" outlined dense type="email" class="col-8" maxlength="40"></q-input>
           </div>
           <div class="row">
             <p class="col-4 q-my-auto text-blue">Téléphone</p>
-            <q-input v-model="phone" color="blue" outlined dense type="phone" class="col-8" @blur="formatPhone" ></q-input>
+            <q-input v-model="phone" color="blue" outlined dense type="phone" class="col-8" @blur="formatPhone" maxlength="20" ></q-input>
           </div>
           <div class="flex flex-center q-pt-lg">
             <q-btn
@@ -45,6 +45,7 @@ import { ref } from "vue";
 import { useProfilStore } from "src/stores/profil-store"; 
 import { onMounted } from "vue";
 import { useQuasar } from 'quasar';
+import { Notify } from 'quasar';
 
 
 const profilStore = useProfilStore();
@@ -53,6 +54,7 @@ const lastName = ref('');
 const email = ref('');
 const phone = ref('');
 const $q = useQuasar();
+
 
 const formatPhone = () => {
       const cleanPhone = phone.value.replace(/\D/g, ''); 
@@ -71,6 +73,7 @@ const fetchUserProfil = async() => {
     phone.value = mail.phone;
     
 } catch (error) {
+  Notify.create({ message: "Une erreur est survenue.", type: "negative" });
   return error
 }
 };

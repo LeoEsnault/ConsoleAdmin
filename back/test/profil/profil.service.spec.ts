@@ -88,7 +88,7 @@ describe('ProfilService', () => {
       try {
         await profilService.updateUserProfile(userId, data);
       } catch (error) {
-        expect(error.message).toBe('Numéro de téléphone invalide !');
+        expect(error.message).toBe('Le numéro de téléphone fourni est trop long ou contient des caractères invalides.');
       }
     });
 

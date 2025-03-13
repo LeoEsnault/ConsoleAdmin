@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ProfilFacade } from './profil.facade'
-import { ProfileNotFoundException, ProfileUpdateException } from '../exceptions/user.exceptions'
+import { ProfileNotFoundException, ProfileUpdateException, InvalidFormatException, InvalidEmailFormatException} from '../exceptions/user.exceptions'
+
 
 @Injectable()
 export class ProfilService {
@@ -19,21 +20,29 @@ export class ProfilService {
 
 
   async updateUserProfile(userId: string, data: any) {
-    const phone = data.phone;
-    const email = data.email;
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[1-9]\d{1,14}$/;  
+    const { phone, email, firstname, lastname } = data;
 
-    if (!email || typeof email !== "string") {
-      throw new Error("Email invalide !");
-  }
-  
-  if (phone && typeof phone !== "string") {
-      throw new Error("Numéro de téléphone invalide !");
-  }
-    try {
-      return await this.profilFacade.updateUserProfile(userId, data)
-    } catch (error) {
-      console.error('Erreur dans lors de la mise à jour du profil utilisateur:', error)
-      throw new ProfileUpdateException(error, `Erreur dans lors de la mise à jour du profil utilisateur ${userId}`)
+    if (lastname && lastname.length > 40) {
+        throw new InvalidFormatException('Le nom fourni est trop long ou contient des caractères invalides.');
     }
-  }
+    if (firstname && firstname.length > 40) {
+        throw new InvalidFormatException('Le prénom fourni est trop long ou contient des caractères invalides.');
+    }
+    if (phone && (typeof phone !== "string" || phone.length > 20 || !phoneRegex.test(phone))) {
+        throw new InvalidFormatException('Le numéro de téléphone fourni est trop long ou contient des caractères invalides.');
+    }
+    if (email && (typeof email !== "string" || email.length > 40 || !emailRegex.test(email))) {
+        throw new InvalidEmailFormatException();
+    }
+
+    try {
+        return await this.profilFacade.updateUserProfile(userId, data);
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du profil utilisateur:', error);
+        throw new ProfileUpdateException(error, `Erreur lors de la mise à jour du profil utilisateur ${userId}`);
+    }
+}
 }
