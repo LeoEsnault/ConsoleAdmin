@@ -19,6 +19,16 @@ export class ProfilService {
 
 
   async updateUserProfile(userId: string, data: any) {
+    const phone = data.phone;
+    const email = data.email;
+
+    if (!email || typeof email !== "string") {
+      throw new Error("Email invalide !");
+  }
+  
+  if (phone && typeof phone !== "string") {
+      throw new Error("Numéro de téléphone invalide !");
+  }
     try {
       return await this.profilFacade.updateUserProfile(userId, data)
     } catch (error) {

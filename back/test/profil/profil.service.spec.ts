@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilService } from '../../src/profil/profil.service';
 import { ProfilFacade } from '../../src/profil/profil.facade';
+import { ProfileNotFoundException, ProfileUpdateException } from '../../src/exceptions/user.exceptions';
 
 describe('ProfilService', () => {
   let profilService: ProfilService;
@@ -29,9 +30,9 @@ describe('ProfilService', () => {
   });
 
   describe('getUserProfile', () => {
-    it('Renvois les datas ', async () => {
+    it('Renvoie les données du profil', async () => {
       const userId = 'user123';
-      const userProfile = { user_id: userId, name: 'jane darc' };
+      const userProfile = { user_id: userId, name: 'Jane Darc' };
 
       profilFacade.getUserProfile = jest.fn().mockResolvedValue(userProfile);
 
@@ -41,25 +42,25 @@ describe('ProfilService', () => {
       expect(profilFacade.getUserProfile).toHaveBeenCalledWith(userId);
     });
 
-    it('erreur quand userId pas trouvé', async () => {
+    it('Erreur quand le profil n\'est pas trouvé', async () => {
       const userId = 'user123';
 
-      profilFacade.getUserProfile = jest.fn().mockRejectedValue(new Error('Profil(s) non trouvé(s), Ou erreur lors de la requête.'));
+      profilFacade.getUserProfile = jest.fn().mockRejectedValue(new Error('Profil(s) non trouvé(s), ou erreur lors de la requête.'));
 
       try {
         await profilService.getUserProfile(userId);
       } catch (error) {
-        expect(error.message).toBe('Profil(s) non trouvé(s), Ou erreur lors de la requête.');
+        expect(error).toBeInstanceOf(ProfileNotFoundException);
+        expect(error.message).toBe(`Profil(s) non trouvé(s), ou erreur lors de la requête.`);
       }
     });
   });
 
   describe('updateUserProfile', () => {
-    it('renvois les données mis à jour', async () => {
+    it('Renvoie les données mises à jour', async () => {
       const userId = 'user123';
-      const data = { name: 'Jane darc de rouen' };
-      const updatedUser = { user_id: userId, name: 'Jane darc de rouen' };
-
+      const data = { name: 'Jane Darc de Rouen', email: 'jane@example.com', phone: '1234567890' };
+      const updatedUser = { user_id: userId, name: 'Jane Darc de Rouen', email: 'jane@example.com', phone: '1234567890' };
 
       profilFacade.updateUserProfile = jest.fn().mockResolvedValue(updatedUser);
 
@@ -69,17 +70,39 @@ describe('ProfilService', () => {
       expect(profilFacade.updateUserProfile).toHaveBeenCalledWith(userId, data);
     });
 
-    it('Renvois une erreur quand les infos ne peuvent pas etre update', async () => {
+    it('Renvoie une erreur quand l\'email est invalide', async () => {
       const userId = 'user123';
-      const data = { name: 'Jane Doe' };
+      const data = { name: 'Jane Doe', email: '', phone: '1234567890' };
 
-    
+      try {
+        await profilService.updateUserProfile(userId, data);
+      } catch (error) {
+        expect(error.message).toBe('Email invalide !');
+      }
+    });
+
+    it('Renvoie une erreur quand le téléphone est invalide', async () => {
+      const userId = 'user123';
+      const data = { name: 'Jane Doe', email: 'jane@example.com', phone: 1234567890 };
+
+      try {
+        await profilService.updateUserProfile(userId, data);
+      } catch (error) {
+        expect(error.message).toBe('Numéro de téléphone invalide !');
+      }
+    });
+
+    it('Renvoie une erreur quand les infos ne peuvent pas être mises à jour', async () => {
+      const userId = 'user123';
+      const data = { name: 'Jane Doe', email: 'jane@example.com', phone: '1234567890' };
+
       profilFacade.updateUserProfile = jest.fn().mockRejectedValue(new Error('Erreur lors de la mise à jour du profil.'));
 
       try {
         await profilService.updateUserProfile(userId, data);
       } catch (error) {
-        expect(error.message).toBe('Erreur lors de la mise à jour du profil.');
+        expect(error).toBeInstanceOf(ProfileUpdateException);
+        expect(error.message).toBe(`Erreur lors de la mise à jour du profil.`);
       }
     });
   });

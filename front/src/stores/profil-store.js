@@ -14,9 +14,9 @@ export const useProfilStore = defineStore('profil', {
     async fetchUserProfil() {
       try {
        
-        let user_id = localStorage.getItem("user_id"); 
-    
-        
+        const user = JSON.parse(localStorage.getItem('user'));
+        let user_id = user ? user.id : null;
+      
         const { data, error: sessionError } = await supabase.auth.getSession();
     
         if (sessionError) {
@@ -26,7 +26,7 @@ export const useProfilStore = defineStore('profil', {
         if (data?.session?.user?.id) {
           console.log("Session existante pour l'utilisateur");
           user_id = data.session.user.id; 
-          localStorage.setItem("user_id", user_id); 
+          localStorage.setItem('user' , JSON.stringify(data.session.user)); 
         } else {
           console.log("Aucune session active.");
         }
@@ -55,7 +55,9 @@ export const useProfilStore = defineStore('profil', {
       this.loading = true;
     
       try {
-        const user_id = localStorage.getItem("user_id");
+        const user = JSON.parse(localStorage.getItem('user'));
+        let user_id = user ? user.id : null;
+        
         if (!user_id) {
           console.error("Aucun ID utilisateur trouvé");
         }

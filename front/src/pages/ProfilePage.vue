@@ -95,7 +95,6 @@ const updateProfil = async () => {
       message: 'Vos informations ont été mises à jour.',
       type: 'positive',
     })
-    console.log('Profil mis à jour avec succès', data)
   }
   } catch (error) {
     console.error('Erreur lors de la mise à jour du profil', error);
