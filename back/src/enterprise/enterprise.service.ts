@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import * as userExceptions from '../exceptions/user.exceptions';
-import * as enterpriseExceptions from '../exceptions/enterprise.exceptions';
+import * as Exceptions from '../exceptions';
 import * as enterpriseFacade from './enterprise.facade';
 
 export interface User {
@@ -36,7 +35,7 @@ export class EnterpriseService {
     const { data: enterprise, error: enterpriseError } = await enterpriseFacade.getEnterprise(id);
 
     if (enterpriseError || !enterprise) {
-      throw new enterpriseExceptions.EnterpriseNotFoundException();
+      throw new Exceptions.EnterpriseNotFoundException();
     }
 
     // get super_admin
@@ -57,7 +56,7 @@ export class EnterpriseService {
 
     if (profilesError) {
       console.error('Erreur', profilesError);
-      throw new userExceptions.ProfileNotFoundException();
+      throw new Exceptions.ProfileNotFoundException();
     }
 
     if (!profiles || profiles.length === 0) {
@@ -95,7 +94,7 @@ export class EnterpriseService {
     const { data: enterprises, error: enterprisesError } = await enterpriseFacade.getEnterprises();
 
     if (enterprisesError) {
-      throw new enterpriseExceptions.EnterpriseNotFoundException();
+      throw new Exceptions.EnterpriseNotFoundException();
     }
 
     return enterprises;

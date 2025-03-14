@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilService } from '../../src/profil/profil.service';
 import { ProfilFacade } from '../../src/profil/profil.facade';
-import { ProfileNotFoundException, ProfileUpdateException } from '../../src/exceptions/user.exceptions';
+import * as Exceptions from '../../src/exceptions';
 
 describe('ProfilService', () => {
   let profilService: ProfilService;
@@ -42,15 +42,17 @@ describe('ProfilService', () => {
       expect(profilFacade.getUserProfile).toHaveBeenCalledWith(userId);
     });
 
-    it('Erreur quand le profil n\'est pas trouvé', async () => {
+    it("Erreur quand le profil n'est pas trouvé", async () => {
       const userId = 'user123';
 
-      profilFacade.getUserProfile = jest.fn().mockRejectedValue(new Error('Profil(s) non trouvé(s), ou erreur lors de la requête.'));
+      profilFacade.getUserProfile = jest
+        .fn()
+        .mockRejectedValue(new Error('Profil(s) non trouvé(s), ou erreur lors de la requête.'));
 
       try {
         await profilService.getUserProfile(userId);
       } catch (error) {
-        expect(error).toBeInstanceOf(ProfileNotFoundException);
+        expect(error).toBeInstanceOf(Exceptions.ProfileNotFoundException);
         expect(error.message).toBe(`Profil(s) non trouvé(s), ou erreur lors de la requête.`);
       }
     });
@@ -60,7 +62,12 @@ describe('ProfilService', () => {
     it('Renvoie les données mises à jour', async () => {
       const userId = 'user123';
       const data = { name: 'Jane Darc de Rouen', email: 'jane@example.com', phone: '1234567890' };
-      const updatedUser = { user_id: userId, name: 'Jane Darc de Rouen', email: 'jane@example.com', phone: '1234567890' };
+      const updatedUser = {
+        user_id: userId,
+        name: 'Jane Darc de Rouen',
+        email: 'jane@example.com',
+        phone: '1234567890',
+      };
 
       profilFacade.updateUserProfile = jest.fn().mockResolvedValue(updatedUser);
 
@@ -70,7 +77,7 @@ describe('ProfilService', () => {
       expect(profilFacade.updateUserProfile).toHaveBeenCalledWith(userId, data);
     });
 
-    it('Renvoie une erreur quand l\'email est invalide', async () => {
+    it("Renvoie une erreur quand l'email est invalide", async () => {
       const userId = 'user123';
       const data = { name: 'Jane Doe', email: '', phone: '1234567890' };
 
@@ -96,12 +103,14 @@ describe('ProfilService', () => {
       const userId = 'user123';
       const data = { name: 'Jane Doe', email: 'jane@example.com', phone: '1234567890' };
 
-      profilFacade.updateUserProfile = jest.fn().mockRejectedValue(new Error('Erreur lors de la mise à jour du profil.'));
+      profilFacade.updateUserProfile = jest
+        .fn()
+        .mockRejectedValue(new Error('Erreur lors de la mise à jour du profil.'));
 
       try {
         await profilService.updateUserProfile(userId, data);
       } catch (error) {
-        expect(error).toBeInstanceOf(ProfileUpdateException);
+        expect(error).toBeInstanceOf(Exceptions.ProfileUpdateException);
         expect(error.message).toBe(`Erreur lors de la mise à jour du profil.`);
       }
     });

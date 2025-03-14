@@ -2,9 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { UserService } from '../../src/user/user.service';
 import { SupabaseService } from '../../src/supabase/supabase.service';
-import * as userExceptions from '../../src/exceptions/user.exceptions';
-import * as enterpriseExceptions from '../../src/exceptions/enterprise.exceptions';
-import * as roleExceptions from '../../src/exceptions/role.exceptions';
+import * as Exceptions from '../../src/exceptions';
 import * as userFacade from '../../src/user/user.facade';
 
 const mockSupabaseClient = {
@@ -80,14 +78,14 @@ describe('UserService', () => {
 
     it('doit lever une UserNotFoundException si l’utilisateur n’existe pas', async () => {
       (userFacade.getUserById as jest.Mock).mockResolvedValue({ data: null, error: 'User not found' });
-      await expect(userService.getUserEnterprise(mockId)).rejects.toThrow(userExceptions.UserNotFoundException);
+      await expect(userService.getUserEnterprise(mockId)).rejects.toThrow(Exceptions.UserNotFoundException);
       expect(userFacade.getUserById).toHaveBeenCalledWith(mockId);
     });
 
     it('doit lever une ProfileNotFoundException si le profil n’existe pas', async () => {
       (userFacade.getProfiles as jest.Mock).mockResolvedValue({ data: null, error: 'Profil not found' });
 
-      await expect(userService.getUserEnterprise(mockId)).rejects.toThrow(userExceptions.ProfileNotFoundException);
+      await expect(userService.getUserEnterprise(mockId)).rejects.toThrow(Exceptions.ProfileNotFoundException);
       expect(userFacade.getProfiles).toHaveBeenCalledWith(mockId);
     });
 
@@ -156,7 +154,7 @@ describe('UserService', () => {
         enterprise: '123',
       };
 
-      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.InvalidUserDataException);
+      await expect(userService.createUser(mockBody)).rejects.toThrow(Exceptions.InvalidUserDataException);
     });
 
     it("devrait lever une EnterpriseNotFoundException si l'entreprise n'est pas trouvé", async () => {
@@ -167,7 +165,7 @@ describe('UserService', () => {
 
       (userFacade.getEnterprise as jest.Mock).mockResolvedValue({ data: null, error: { message: 'Not found' } });
 
-      await expect(userService.createUser(mockBody)).rejects.toThrow(enterpriseExceptions.EnterpriseNotFoundException);
+      await expect(userService.createUser(mockBody)).rejects.toThrow(Exceptions.EnterpriseNotFoundException);
 
       expect(userFacade.getEnterprise).toHaveBeenCalledWith(mockBody.enterprise);
     });
@@ -178,7 +176,7 @@ describe('UserService', () => {
         error: { code: 'email_exists', message: 'Email already in use' },
       });
 
-      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.UserAlreadyExistsException);
+      await expect(userService.createUser(mockBody)).rejects.toThrow(Exceptions.UserAlreadyExistsException);
 
       expect(userFacade.createUser).toHaveBeenCalledWith(mockBody.email);
     });
@@ -189,7 +187,7 @@ describe('UserService', () => {
         error: { code: 'other_error', message: 'Unknown error' },
       });
 
-      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.UserCreationException);
+      await expect(userService.createUser(mockBody)).rejects.toThrow(Exceptions.UserCreationException);
 
       expect(userFacade.createUser).toHaveBeenCalledWith(mockBody.email);
     });
@@ -200,7 +198,7 @@ describe('UserService', () => {
         error: null,
       });
 
-      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.UserCreationException);
+      await expect(userService.createUser(mockBody)).rejects.toThrow(Exceptions.UserCreationException);
 
       expect(userFacade.createUser).toHaveBeenCalledWith(mockBody.email);
     });
@@ -211,7 +209,7 @@ describe('UserService', () => {
         error: { message: "Rôle de l'utilisateur non trouvé." },
       });
 
-      await expect(userService.createUser(mockBody)).rejects.toThrow(roleExceptions.RoleNotFoundException);
+      await expect(userService.createUser(mockBody)).rejects.toThrow(Exceptions.RoleNotFoundException);
 
       expect(userFacade.createRole).toHaveBeenCalledWith(mockUser.id);
     });
@@ -222,7 +220,7 @@ describe('UserService', () => {
         error: { message: 'Profile creation failed' },
       });
 
-      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.ProfileCreationException);
+      await expect(userService.createUser(mockBody)).rejects.toThrow(Exceptions.ProfileCreationException);
 
       expect(userFacade.createProfile).toHaveBeenCalledWith(mockUser.id, mockEnterprise.id);
     });
@@ -233,7 +231,7 @@ describe('UserService', () => {
         error: null,
       });
 
-      await expect(userService.createUser(mockBody)).rejects.toThrow(userExceptions.ProfileNotFoundException);
+      await expect(userService.createUser(mockBody)).rejects.toThrow(Exceptions.ProfileNotFoundException);
 
       expect(userFacade.createProfile).toHaveBeenCalledWith(mockUser.id, mockEnterprise.id);
     });
@@ -289,33 +287,31 @@ describe('UserService', () => {
     it("devrait lever InvalidEmailFormatException si l'email est invalide", async () => {
       const mockBody = { email: 'invalid-email' };
 
-      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(
-        userExceptions.InvalidEmailFormatException
-      );
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(Exceptions.InvalidEmailFormatException);
     });
 
     it("devrait lever UserNotFoundException si l'utilisateur n'existe pas", async () => {
       (userFacade.getUserById as jest.Mock).mockResolvedValue({ data: null, error: { message: 'User not found' } });
 
-      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.UserNotFoundException);
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(Exceptions.UserNotFoundException);
     });
 
     it("devrait lever UserAlreadyExistsException si l'email est déjà pris", async () => {
       (userFacade.updateUserById as jest.Mock).mockResolvedValue({ error: { message: 'Email already in use' } });
 
-      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.UserAlreadyExistsException);
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(Exceptions.UserAlreadyExistsException);
     });
 
     it('devrait lever ProfileNotFoundException si le profil est introuvable', async () => {
       (userFacade.getProfiles as jest.Mock).mockResolvedValue({ data: null, error: { message: 'Profile not found' } });
 
-      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.ProfileNotFoundException);
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(Exceptions.ProfileNotFoundException);
     });
 
     it('devrait lever ProfileUpdateException si la mise à jour du profil échoue avec nom et prénom', async () => {
       (userFacade.updateProfile as jest.Mock).mockResolvedValue({ error: { message: 'Profile update failed' } });
 
-      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.ProfileUpdateException);
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(Exceptions.ProfileUpdateException);
     });
 
     it("devrait lever ProfileUpdateException si la mise à jour du profil échoue avec l'entreprise", async () => {
@@ -323,7 +319,7 @@ describe('UserService', () => {
         error: { message: 'Profile update failed' },
       });
 
-      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(userExceptions.ProfileUpdateException);
+      await expect(userService.updateUser(mockId, mockBody)).rejects.toThrow(Exceptions.ProfileUpdateException);
     });
   });
 
@@ -354,7 +350,7 @@ describe('UserService', () => {
 
     it("devrait lever une exception si l'ID est invalide", async () => {
       const mockId = '';
-      await expect(userService.deleteUser(mockId)).rejects.toThrow(userExceptions.InvalidUserDataException);
+      await expect(userService.deleteUser(mockId)).rejects.toThrow(Exceptions.InvalidUserDataException);
     });
 
     it('devrait lever une exception si les rôle est introuvable', async () => {
@@ -363,17 +359,17 @@ describe('UserService', () => {
         error: { message: "Rôle de l'utilisateur non trouvé" },
       });
 
-      await expect(userService.deleteUser(mockId)).rejects.toThrow(roleExceptions.RoleNotFoundException);
+      await expect(userService.deleteUser(mockId)).rejects.toThrow(Exceptions.RoleNotFoundException);
     });
 
     it('devrait lever une exception si le user a un rôle super_admin', async () => {
       (userFacade.getRole as jest.Mock).mockResolvedValue({ data: mockSuperAdminRole, error: null });
-      await expect(userService.deleteUser(mockId)).rejects.toThrow(userExceptions.UserDeleteException);
+      await expect(userService.deleteUser(mockId)).rejects.toThrow(Exceptions.UserDeleteException);
     });
 
     it('devrait lever une exception si Supabase renvoie une erreur', async () => {
       (userFacade.deleteUser as jest.Mock).mockResolvedValue({ error: { message: 'Erreur mocké' } });
-      await expect(userService.deleteUser(mockId)).rejects.toThrow(userExceptions.UserDeleteException);
+      await expect(userService.deleteUser(mockId)).rejects.toThrow(Exceptions.UserDeleteException);
     });
   });
 });

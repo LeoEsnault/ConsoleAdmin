@@ -1,8 +1,6 @@
 import { Controller, Get, Post, Put, Param, Body, HttpException, HttpStatus, Delete } from '@nestjs/common';
 import { CreateUser, User, UserService } from './user.service';
-import * as userExceptions from '../exceptions/user.exceptions';
-import * as roleExceptions from '../exceptions/role.exceptions';
-import * as enterpriseExceptions from '../exceptions/enterprise.exceptions';
+import { handleException } from '../../utils/handleExceptions';
 
 @Controller('users')
 export class UserController {
@@ -50,40 +48,4 @@ export class UserController {
       throw new HttpException(message, status);
     }
   }
-}
-
-export function handleException(error: any): { message: string; status: HttpStatus } {
-  if (
-    error instanceof userExceptions.UserNotFoundException ||
-    error instanceof userExceptions.ProfileNotFoundException ||
-    error instanceof enterpriseExceptions.EnterpriseNotFoundException ||
-    error instanceof roleExceptions.RoleNotFoundException
-  ) {
-    return { message: error.message, status: HttpStatus.NOT_FOUND };
-  }
-
-  if (
-    error instanceof userExceptions.UserCreationException ||
-    error instanceof userExceptions.InvalidEmailFormatException ||
-    error instanceof userExceptions.InvalidUserDataException ||
-    error instanceof userExceptions.SuperAdminDeleteException
-  ) {
-    return { message: error.message, status: HttpStatus.BAD_REQUEST };
-  }
-
-  if (
-    error instanceof userExceptions.ProfileCreationException ||
-    error instanceof userExceptions.ProfileUpdateException ||
-    error instanceof userExceptions.DatabaseException ||
-    error instanceof userExceptions.UserDeleteException
-  ) {
-    return { message: error.message, status: HttpStatus.INTERNAL_SERVER_ERROR };
-  }
-
-  if (error instanceof userExceptions.UserAlreadyExistsException) {
-    return { message: error.message, status: HttpStatus.CONFLICT };
-  }
-
-  //console.error('Erreur inconnue :', error);
-  return { message: error.response.message, status: error.response.statusCode };
 }

@@ -1,10 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { PostgrestError } from '@supabase/supabase-js';
-import * as userExceptions from '../exceptions/user.exceptions';
-import * as enterpriseExceptions from '../exceptions/enterprise.exceptions';
+import * as Exceptions from '../exceptions';
 import * as userFacade from './user.facade';
-import * as roleExceptions from '../exceptions/role.exceptions';
+import { isValidEmail } from '../../utils/isValidEmail';
 
 export interface User {
   id: string;
@@ -37,13 +36,13 @@ export class UserService {
     const { error: getUserError } = await userFacade.getUserById(userId);
 
     if (getUserError) {
-      throw new userExceptions.UserNotFoundException();
+      throw new Exceptions.UserNotFoundException();
     }
 
     const { data: profile, error: profilesError } = await userFacade.getProfiles(userId);
 
     if (profilesError || !profile) {
-      throw new userExceptions.ProfileNotFoundException();
+      throw new Exceptions.ProfileNotFoundException();
     }
 
     const { data: enterprise, error: enterpriseError } = await userFacade.getEnterprise(profile.enterprise_id);
@@ -57,44 +56,44 @@ export class UserService {
 
   async createUser(body: CreateUser): Promise<User> {
     if (!body.email || !isValidEmail(body.email) || !body.enterprise) {
-      throw new userExceptions.InvalidUserDataException();
+      throw new Exceptions.InvalidUserDataException();
     }
 
     const { data: enterprise, error: enterpriseError } = await userFacade.getEnterprise(body.enterprise);
 
     if (enterpriseError) {
-      throw new enterpriseExceptions.EnterpriseNotFoundException();
+      throw new Exceptions.EnterpriseNotFoundException();
     }
 
     const { data: user, error: authError } = await userFacade.createUser(body.email);
 
     if (authError) {
       if (authError.code === 'email_exists') {
-        throw new userExceptions.UserAlreadyExistsException();
+        throw new Exceptions.UserAlreadyExistsException();
       }
 
-      throw new userExceptions.UserCreationException();
+      throw new Exceptions.UserCreationException();
     }
 
     if (!user || !user.user) {
-      throw new userExceptions.UserCreationException();
+      throw new Exceptions.UserCreationException();
     }
 
     const { error: roleError } = await userFacade.createRole(user.user.id);
 
     if (roleError) {
-      throw new roleExceptions.RoleNotFoundException();
+      throw new Exceptions.RoleNotFoundException();
     }
 
     const { data: profile, error: profileError }: { data: Profile | null; error: PostgrestError | null } =
       await userFacade.createProfile(user.user.id, enterprise.id);
 
     if (profileError) {
-      throw new userExceptions.ProfileCreationException();
+      throw new Exceptions.ProfileCreationException();
     }
 
     if (!profile) {
-      throw new userExceptions.ProfileNotFoundException();
+      throw new Exceptions.ProfileNotFoundException();
     }
 
     return {
@@ -107,20 +106,20 @@ export class UserService {
   async updateUser(id: string, body: Partial<User>): Promise<User> {
     if (body.email) {
       if (!isValidEmail(body.email)) {
-        throw new userExceptions.InvalidEmailFormatException();
+        throw new Exceptions.InvalidEmailFormatException();
       }
 
       const { data: existingUser, error: getUserError } = await userFacade.getUserById(id);
 
       if (getUserError) {
-        throw new userExceptions.UserNotFoundException();
+        throw new Exceptions.UserNotFoundException();
       }
 
       if (existingUser?.user?.email != body.email) {
         const { error: userError } = await userFacade.updateUserById(id, body.email);
 
         if (userError) {
-          throw new userExceptions.UserAlreadyExistsException();
+          throw new Exceptions.UserAlreadyExistsException();
         }
       }
     }
@@ -128,7 +127,7 @@ export class UserService {
     const { data: profile, error: profileError } = await userFacade.getProfiles(id);
 
     if (profileError || !profile) {
-      throw new userExceptions.ProfileNotFoundException();
+      throw new Exceptions.ProfileNotFoundException();
     }
 
     if (body?.profile?.firstname || body?.profile?.lastname) {
@@ -139,7 +138,7 @@ export class UserService {
       );
 
       if (profileUpdateError) {
-        throw new userExceptions.ProfileUpdateException();
+        throw new Exceptions.ProfileUpdateException();
       }
     }
 
@@ -150,7 +149,7 @@ export class UserService {
       );
 
       if (enterpriseError) {
-        throw new userExceptions.ProfileUpdateException();
+        throw new Exceptions.ProfileUpdateException();
       }
     }
 
@@ -168,30 +167,25 @@ export class UserService {
 
   async deleteUser(id: string) {
     if (!id) {
-      throw new userExceptions.InvalidUserDataException();
+      throw new Exceptions.InvalidUserDataException();
     }
 
     const { data: role, error: roleError } = await userFacade.getRole(id);
 
     if (roleError) {
-      throw new roleExceptions.RoleNotFoundException();
+      throw new Exceptions.RoleNotFoundException();
     }
 
     if (role?.role === 'super_admin') {
-      throw new userExceptions.UserDeleteException();
+      throw new Exceptions.UserDeleteException();
     }
 
     const { error } = await userFacade.deleteUser(id);
 
     if (error) {
-      throw new userExceptions.UserDeleteException();
+      throw new Exceptions.UserDeleteException();
     }
 
     return 'ok';
   }
 }
-
-const isValidEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@_]+(\.[^\s@_]+)+$/;
-  return emailRegex.test(email);
-};

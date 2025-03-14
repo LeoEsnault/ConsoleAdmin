@@ -2,8 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { EnterpriseService } from '../../src/enterprise/enterprise.service';
 import { SupabaseService } from '../../src/supabase/supabase.service';
-import * as enterpriseExceptions from '../../src/exceptions/enterprise.exceptions';
-import * as userExceptions from '../../src/exceptions/user.exceptions';
+import * as Exceptions from '../../src/exceptions';
 import * as enterpriseFacade from '../../src/enterprise/enterprise.facade';
 
 const mockSupabaseClient = {
@@ -101,7 +100,7 @@ describe('EnterpriseService', () => {
       });
 
       await expect(enterpriseService.getUsers(enterpriseId, page, pageSize)).rejects.toThrow(
-        enterpriseExceptions.EnterpriseNotFoundException
+        Exceptions.EnterpriseNotFoundException
       );
 
       expect(enterpriseFacade.getEnterprise).toHaveBeenCalledWith(enterpriseId);
@@ -119,7 +118,7 @@ describe('EnterpriseService', () => {
       });
 
       await expect(enterpriseService.getUsers(enterpriseId, page, pageSize)).rejects.toThrow(
-        userExceptions.ProfileNotFoundException
+        Exceptions.ProfileNotFoundException
       );
 
       expect(enterpriseFacade.getProfiles).toHaveBeenCalledWith(enterpriseId, page, pageSize, superAdminIds);
@@ -171,9 +170,7 @@ describe('EnterpriseService', () => {
         error: { message: 'Enterprise not found' },
       });
 
-      await expect(enterpriseService.getEnterprises()).rejects.toThrow(
-        enterpriseExceptions.EnterpriseNotFoundException
-      );
+      await expect(enterpriseService.getEnterprises()).rejects.toThrow(Exceptions.EnterpriseNotFoundException);
 
       expect(enterpriseFacade.getEnterprises).toHaveBeenCalled();
     });

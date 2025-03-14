@@ -1,17 +1,7 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  ParseIntPipe,
-  DefaultValuePipe,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, ParseIntPipe, DefaultValuePipe, HttpException } from '@nestjs/common';
 import { EnterpriseService } from './enterprise.service';
 import { User } from './enterprise.service';
-import * as userExceptions from '../exceptions/user.exceptions';
-import * as enterpriseExceptions from '../exceptions/enterprise.exceptions';
+import { handleException } from '../../utils/handleExceptions';
 
 interface GetUsersResponse {
   users: User[];
@@ -46,16 +36,4 @@ export class EnterpriseController {
       throw new HttpException(message, status);
     }
   }
-}
-
-export function handleException(error: any): { message: string; status: HttpStatus } {
-  if (
-    error instanceof enterpriseExceptions.EnterpriseNotFoundException ||
-    error instanceof userExceptions.ProfileNotFoundException
-  ) {
-    return { message: error.message, status: HttpStatus.NOT_FOUND };
-  }
-
-  //console.error('Erreur', error);
-  return { message: error.response.message, status: error.response.statusCode };
 }

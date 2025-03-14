@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilController } from '../../src/profil/profil.controller';
 import { ProfilService } from '../../src/profil/profil.service';
-import { ProfileNotFoundException } from '../../src/exceptions/user.exceptions'
-
+import * as Exceptions from '../../src/exceptions';
 
 const mockProfilService = {
   getUserProfile: jest.fn(),
@@ -16,9 +15,7 @@ describe('ProfilController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProfilController],
-      providers: [
-        { provide: ProfilService, useValue: mockProfilService },
-      ],
+      providers: [{ provide: ProfilService, useValue: mockProfilService }],
     }).compile();
 
     profilController = module.get<ProfilController>(ProfilController);
@@ -32,9 +29,9 @@ describe('ProfilController', () => {
   describe('getUserProfile', () => {
     it('ProfileNotFoundException si pas de userId', async () => {
       try {
-        await profilController.getUserProfile(''); 
+        await profilController.getUserProfile('');
       } catch (error) {
-        expect(error).toBeInstanceOf(ProfileNotFoundException);
+        expect(error).toBeInstanceOf(Exceptions.ProfileNotFoundException);
         expect(error.message).toBe('Profil(s) non trouvé(s), Ou erreur lors de la requête.');
       }
     });
@@ -43,7 +40,6 @@ describe('ProfilController', () => {
       const userId = '1';
       const mockProfile = { user_id: '1', name: 'Jane darc' };
 
-     
       mockProfilService.getUserProfile.mockResolvedValue(mockProfile);
 
       const result = await profilController.getUserProfile(userId);
@@ -56,9 +52,9 @@ describe('ProfilController', () => {
   describe('updateUserProfil', () => {
     it('ProfileNotFoundException si le userId nest pas reconnu ', async () => {
       try {
-        await profilController.updateUserProfil('', { name: 'Jane darc'}); 
+        await profilController.updateUserProfil('', { name: 'Jane darc' });
       } catch (error) {
-        expect(error).toBeInstanceOf(ProfileNotFoundException);
+        expect(error).toBeInstanceOf(Exceptions.ProfileNotFoundException);
         expect(error.message).toBe('Profil(s) non trouvé(s), Ou erreur lors de la requête.');
       }
     });
@@ -68,7 +64,6 @@ describe('ProfilController', () => {
       const updateData = { name: 'Jane darc de rouen' };
       const updatedProfile = { user_id: '1', name: 'Jane darc de rouen' };
 
-     
       mockProfilService.updateUserProfile.mockResolvedValue(updatedProfile);
 
       const result = await profilController.updateUserProfil(userId, updateData);
