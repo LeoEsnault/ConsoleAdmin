@@ -65,11 +65,4 @@ describe('UsersPage.vue', () => {
 
     await expect(wrapper.vm.addUser(data.email)).rejects.toThrow('Failed to add user')
   })
-
-  it('should fetch users when SelectEnterprise emit update', async () => {
-    const enterpriseChange = wrapper.find('#select-enterprise')
-    await enterpriseChange.trigger('update')
-
-    expect(usersStoreMock.getUsers).toHaveBeenCalledWith(1, 10)
-  })
 })

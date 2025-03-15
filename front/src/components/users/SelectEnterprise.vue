@@ -1,13 +1,6 @@
 <template>
-  <div class="bg-grey-2 q-px-xl q-pa-md q-mb-md col-12 items-center"
-    :class="$q.screen.lt.md ? '' : 'row q-gutter-x-md'">
-    <span class="q-my-auto text-blue" :class="$q.screen.lt.md ? 'q-pb-xs' : 'col-auto'">
-      Se connecter à une entreprise :
-    </span>
-
-    <q-select v-model="selectedEnterprise" :options="availableEnterprises" @update:model-value="updateUserEnterprise()"
-      option-label="name" class="select-input" style="width: 240px" rounded outlined dense />
-  </div>
+  <q-select v-model="selectedEnterprise" :options="availableEnterprises" @update:model-value="updateUserEnterprise()"
+    option-label="name" class="select-input" style="width: 140px" dense />
 </template>
 
 <script setup>

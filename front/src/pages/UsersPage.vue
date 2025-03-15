@@ -1,7 +1,5 @@
 <template>
   <q-page class="column flex justify-center">
-    <SelectEnterprise id="select-enterprise" @update="refresh" />
-
     <!-- DESKTOP -->
     <div v-if="$q.screen.gt.sm" class="column q-px-xl q-gutter-y-md">
       <AddUser @click="addUser" />
@@ -54,7 +52,6 @@ import AddUser from 'src/components/users/AddUser.vue'
 import SkeletonText from 'src/components/skeletons/SkeletonText.vue'
 import SkeletonRange from 'src/components/skeletons/SkeletonRange.vue'
 import { checkEmail } from 'src/utils/helpers'
-import SelectEnterprise from 'src/components/users/SelectEnterprise.vue'
 
 const $q = useQuasar()
 const isLoading = ref(true)

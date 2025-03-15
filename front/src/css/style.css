@@ -1,125 +1,124 @@
 .text-negative {
-    color: #e53935;
-    /* Rouge */
-  }
-  
-  .text-positive {
-    color: #43a047;
-    /* Vert */
-  }
-  /* bouton kalixys*/
-  
-  .modern-primary-btn {
-    background: white;
-    color: #263286 !important;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    font-weight: 400;
-    height: 40px;
-    padding: 0 1.5rem;
-    transition: all 0.3s ease;
-  }
-  
-  .modern-primary-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: var(--q-primary);
-  }
-  
-  .modern-primary-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* État de chargement */
-  .modern-primary-btn.q-btn--loading {
-    background: #f8fafc;
-  }
-  
-  /* Avec icône */
-  .modern-primary-btn i {
-    font-size: 1rem;
-  }
-  
-  /* Animation du spinner */
-  .modern-primary-btn .q-spinner {
-    color: var(--q-primary);
-  }
-  
-  .button-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 2rem 0;
-  }
-  /* fond et logo */
-  .bg-image {
-    height: 100vh;
-    width: 100%;
-    background-image: url("/assets/BackgroundBannerLogo.jpg");
-    background-size: cover;
-    background-position: center;
-  }
-  
-  .form {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100%;
-  }
-  
-  .success-message {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #35e549;
-    margin-top: 10px;
-  }
-  
-  .success-icon {
-    font-size: 20px;
-    font-weight: bold;
-    margin-right: 8px;
-  }
-  
-  .success-text {
-    font-size: 14px;
-  }
-  
-  .error-message {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #e53935;
-    margin-top: 10px;
-  }
-  
-  .error-icon {
-    font-size: 20px;
-    font-weight: bold;
-    margin-right: 8px;
-  }
-  
-  .error-text {
-    font-size: 14px;
-  }
-  /*login */
-  .mdpForget{
-    text-decoration: 0;
-    font-size: smaller;
-    color: #9e9e9e !important ;
-  }
-  .mdpForgetRight{
-    text-align: right;
-  }
-  
-  /*forget Password */
-  #formForgetPassword{
-    width: 85%;
-    margin-left: 7.5%;
-  }
-  #logoForgetPassword{
-    margin-top: 5vh;
-  }
-  
+  color: #e53935;
+  /* Rouge */
+}
+
+.text-positive {
+  color: #43a047;
+  /* Vert */
+}
+/* bouton kalixys*/
+
+.modern-primary-btn {
+  background: white;
+  color: #263286 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  font-weight: 400;
+  height: 40px;
+  padding: 0 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.modern-primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--q-primary);
+}
+
+.modern-primary-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* État de chargement */
+.modern-primary-btn.q-btn--loading {
+  background: #f8fafc;
+}
+
+/* Avec icône */
+.modern-primary-btn i {
+  font-size: 1rem;
+}
+
+/* Animation du spinner */
+.modern-primary-btn .q-spinner {
+  color: var(--q-primary);
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+}
+/* fond et logo */
+.bg-image {
+  height: 100vh;
+  width: 100%;
+  background-image: url('/assets/BackgroundBannerLogo.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.success-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #35e549;
+  margin-top: 10px;
+}
+
+.success-icon {
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.success-text {
+  font-size: 14px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e53935;
+  margin-top: 10px;
+}
+
+.error-icon {
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.error-text {
+  font-size: 14px;
+}
+/*login */
+.mdpForget {
+  text-decoration: 0;
+  font-size: smaller;
+  color: #9e9e9e !important ;
+}
+.mdpForgetRight {
+  text-align: right;
+}
+
+/*forget Password */
+#formForgetPassword {
+  width: 85%;
+}
+
+#logoForgetPassword {
+  margin-top: 5vh;
+}
