@@ -1,37 +1,47 @@
 <template>
   <q-page class="column q-px-xl q-gutter-y-md flex justify-center">
     <h2 style="color: #263286; text-align: center; font-size: xx-large;">Modifiez vos Informations</h2>
-    <q-form @submit="updateProfil()" class="q-gutter-md">
-      <div class="row" id='inputProfile0'>
-        <p class="col-4 q-my-auto text-blue">Nom</p>
-        <q-input v-model="lastName" color="blue" outlined dense type="text" class="col-8" maxlength="40"></q-input>
-      </div>
-      <div class="row" id='inputProfile1'>
-        <p class="col-4 q-my-auto text-blue">Prénom</p>
-        <q-input v-model="firstName" color="blue" outlined dense type="text" class="col-8" maxlength="40"></q-input>
-      </div>
-      <div class="row">
-        <p class="col-4 q-my-auto text-blue">Email</p>
-        <q-input v-model="email" color="blue" outlined dense type="email" class="col-8" maxlength="40"></q-input>
-      </div>
-      <div class="row">
-        <p class="col-4 q-my-auto text-blue">Téléphone</p>
-        <q-input v-model="phone" color="blue" outlined dense type="phone" class="col-8" @blur="formatPhone"
-          maxlength="20"></q-input>
-      </div>
-      <div class="flex flex-center q-pt-lg">
-        <q-btn label="Enregistrer" type="submit" :loading="profilStore.loading" no-caps padding="sm xl"
-          class="modern-primary-btn" id="buttonProfilPage">
-          <template v-slot:loading>
-            <q-spinner-ios />
-          </template>
-        </q-btn>
-      </div>
-    </q-form>
-  </q-page>
-</template>
+        <q-form
+          @submit="updateProfil()"
+          class="q-gutter-md"
+          id="formProfile"
+        >
+          <div class="row" id ='inputProfile0'>
+            <p class="col-4 q-my-auto text-blue">Nom</p>
+            <q-input v-model="lastName" color="blue" outlined dense type="text" class="col-8" maxlength="40" ></q-input>
+          </div>
+          <div class="row" id ='inputProfile1'>
+            <p class="col-4 q-my-auto text-blue">Prénom</p>
+            <q-input v-model="firstName" color="blue" outlined dense type="text" class="col-8" maxlength="40"></q-input>
+          </div>
+          <div class="row">
+            <p class="col-4 q-my-auto text-blue">Email</p>
+            <q-input v-model="email" color="blue" outlined dense type="email" class="col-8" maxlength="40"></q-input>
+          </div>
+          <div class="row">
+            <p class="col-4 q-my-auto text-blue">Téléphone</p>
+            <q-input v-model="phone" color="blue" outlined dense type="phone" class="col-8" @blur="formatPhone" maxlength="20" id="inputPhone" ></q-input>
+          </div>
+          <div class="flex flex-center q-pt-lg">
+            <q-btn
+              label="Enregistrer"
+              type="submit"
+              :loading="profilStore.loading"
+              no-caps
+              padding="sm xl"
+              class="modern-primary-btn"
+              id="buttonProfilPage"
+            >
+              <template v-slot:loading>
+                <q-spinner-ios />
+              </template>
+            </q-btn>
+          </div>
+        </q-form>
+    </q-page>
+  </template>
+  <script setup>
 
-<script setup>
 import { ref } from "vue";
 import { useProfilStore } from "src/stores/profil-store";
 import { onMounted } from "vue";
@@ -56,17 +66,17 @@ const formatPhone = () => {
 
 const fetchUserProfil = async () => {
   try {
-    const { mail, name } = await profilStore.fetchUserProfil();
-
-    lastName.value = name.lastname;
-    firstName.value = name.firstname;
-    email.value = mail.email;
-    phone.value = mail.phone;
-
-  } catch (error) {
-    Notify.create({ message: "Une erreur est survenue.", type: "negative" });
-    return error
-  }
+    const { mail, lastname, firstname, telephone } = await profilStore.fetchUserProfil();
+    
+    lastName.value = lastname;
+    firstName.value = firstname;
+    email.value = mail;
+    phone.value = telephone;
+    
+} catch (error) {
+  Notify.create({ message: "Une erreur est survenue.", type: "negative" });
+  return error
+}
 };
 
 onMounted(() => {
@@ -99,19 +109,26 @@ const updateProfil = async () => {
   }
 };
 
-</script>
-
-<style scoped>
-@import 'src/css/style.css';
-
-form {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  height: 60vh;
-}
-
-.icone:hover {
-  color: #742282;
-}
-</style>
+  </script>
+  
+  <style scoped>
+  @import 'src/css/style.css';
+  form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 60vh;
+    width: 70%;
+    margin-left: 15%
+  }
+  .icone:hover {
+    color: #742282;
+  }
+  @media screen and (min-width: 1500px) {
+    form {
+      width: 50%;
+      margin-left: 25%
+    }
+  }
+  </style>
+ 

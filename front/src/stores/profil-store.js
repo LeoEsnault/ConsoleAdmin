@@ -32,11 +32,13 @@ export const useProfilStore = defineStore('profil', {
         }
         const response = await api.get(`/profiles/${user_id}`);
 
-        const name = response.data.data;
-
-        const mail = response.data.user.user
-
-        return { mail, name };
+        const firstname = response.data.profile.firstname; 
+        const lastname = response.data.profile.lastname;
+        const mail = response.data.user.user.email;
+        const telephone = response.data.user.user.phone;
+        
+        return { mail, firstname, lastname, telephone };
+        
       } catch (error) {
         console.error("Erreur inattendue :", error.message);
       }

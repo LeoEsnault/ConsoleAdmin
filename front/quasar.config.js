@@ -50,9 +50,9 @@ export default defineConfig((ctx) => {
 
       env: {
         BASE_URL: ctx.dev ? "http://localhost:3000" : process.env.BASE_URL,
-        FRONT_URL: ctx.dev ? "" : process.env.FRONT_URL,
+        FRONT_URL: ctx.dev ? "http://localhost:9000" : process.env.FRONT_URL,
         SUPABASE_URL: ctx.dev ? "https://lmzswedsrufajidbcykm.supabase.co" : process.env.SUPABASE_URL,
-        SUPABASE_KEY: ctx.dev ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtenN3ZWRzcnVmYWppZGJjeWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NzE3MDUsImV4cCI6MjA1MjM0NzcwNX0.iaGi8h2hbYEuVKq7QISZvPhUwzR9uMPpxx_m_gL5LXQ" : process.env.SUPABASE_KEY
+        SUPABASE_KEY: ctx.dev ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtenN3ZWRzcnVmYWppZGJjeWttIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNjc3MTcwNSwiZXhwIjoyMDUyMzQ3NzA1fQ.08ycQ1GdjO0vZYiI7nkuc4qPW7Lefko9ybAxbmYyftI" : process.env.SUPABASE_KEY
       },
 
       // rawDefine: {}

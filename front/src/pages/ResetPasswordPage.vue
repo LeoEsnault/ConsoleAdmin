@@ -114,7 +114,7 @@ const updatePassword = async () => {
       type: 'positive',
       message
     })
-    await router.push('/login')
+   await router.push('/login')
   }
 }
 

@@ -101,6 +101,9 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     async logout() {
+      await localStorage.removeItem('user_id')
+      await localStorage.removeItem('user')
+
       try {
         const { error } = await supabase.auth.signOut()
         if (error) {
@@ -178,12 +181,21 @@ export const useAuthStore = defineStore('auth', {
         })
 
         if (error) {
+          if (error.message.includes('New password should be different from the old password.')){
+            return {
+              type: 'error',
+              message: 'Le nouveau mot de passe doit être différent de l\'ancien.'
+            }
+          }
+          else{
           console.error(error)
           return {
             type: 'error',
             message: 'Impossible de mettre à jour votre mot de passe.'
           }
         }
+        }
+         await supabase.auth.signOut()
         return {
           type: 'success',
           message: 'Mot de passe mis à jour avec succés.'

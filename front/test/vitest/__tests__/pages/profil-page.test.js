@@ -6,8 +6,7 @@ import { useProfilStore } from 'src/stores/profil-store';
 vi.mock('src/stores/profil-store', () => ({
   useProfilStore: vi.fn().mockReturnValue({
     fetchUserProfil: vi.fn().mockResolvedValue({
-      mail: { email: 'john.doe@example.com', phone: '0123456789' },
-      name: { firstname: 'John', lastname: 'Doe' }
+    mail: 'john.doe@example.com', telephone: '0123456789', firstname: 'John', lastname: 'Doe'
     }),
     updateProfil: vi.fn().mockResolvedValue({ error: null }),
   }),

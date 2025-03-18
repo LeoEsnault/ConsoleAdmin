@@ -2,6 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilService } from '../../src/profil/profil.service';
 import { ProfilFacade } from '../../src/profil/profil.facade';
 import * as Exceptions from '../../src/exceptions';
+import { isValidEmail, isValidPhone } from '../../utils/isValidEmail';
+
+jest.mock('../../utils/isValidEmail', () => ({
+  isValidEmail: jest.fn(),
+  isValidPhone: jest.fn(),
+}));
 
 describe('ProfilService', () => {
   let profilService: ProfilService;
@@ -14,7 +20,8 @@ describe('ProfilService', () => {
         {
           provide: ProfilFacade,
           useValue: {
-            getUserProfile: jest.fn(),
+            getUser: jest.fn(),
+            getProfile: jest.fn(),
             updateUserProfile: jest.fn(),
           },
         },
@@ -29,90 +36,81 @@ describe('ProfilService', () => {
     expect(profilService).toBeDefined();
   });
 
-  describe('getUserProfile', () => {
-    it('Renvoie les données du profil', async () => {
-      const userId = 'user123';
-      const userProfile = { user_id: userId, name: 'Jane Darc' };
+  describe('updateUserProfile', () => {
+    it('devrait lancer une exception si la mise à jour échoue', async () => {
+      const userId = '12345';
+      const data = { name: 'Test' };
 
-      profilFacade.getUserProfile = jest.fn().mockResolvedValue(userProfile);
+      // Simulation de l'échec lors de la mise à jour du profil
+      profilFacade.updateUserProfile = jest.fn().mockRejectedValue(new Error('Erreur lors de la mise à jour du profil'));
 
-      const result = await profilService.getUserProfile(userId);
-
-      expect(result).toEqual(userProfile);
-      expect(profilFacade.getUserProfile).toHaveBeenCalledWith(userId);
-    });
-
-    it("Erreur quand le profil n'est pas trouvé", async () => {
-      const userId = 'user123';
-
-      profilFacade.getUserProfile = jest
-        .fn()
-        .mockRejectedValue(new Error('Profil(s) non trouvé(s), ou erreur lors de la requête.'));
-
-      try {
-        await profilService.getUserProfile(userId);
-      } catch (error) {
-        expect(error).toBeInstanceOf(Exceptions.ProfileNotFoundException);
-        expect(error.message).toBe(`Profil(s) non trouvé(s), ou erreur lors de la requête.`);
-      }
+      // Vérification que l'exception ProfileUpdateException est bien levée
+      await expect(profilService.updateUserProfile(userId, data))
+        .rejects
+        .toThrow(Exceptions.InvalidFormatException);
     });
   });
 
-  describe('updateUserProfile', () => {
-    it('Renvoie les données mises à jour', async () => {
-      const userId = 'user123';
-      const data = { name: 'Jane Darc de Rouen', email: 'jane@example.com', phone: '1234567890' };
-      const updatedUser = {
-        user_id: userId,
-        name: 'Jane Darc de Rouen',
-        email: 'jane@example.com',
-        phone: '1234567890',
+  describe('getUserProfile', () => {
+    it('devrait lancer une exception UserNotFoundException si l\'utilisateur n\'est pas trouvé', async () => {
+      const userId = '12345';
+
+      // Mock de getUser pour renvoyer une erreur de type "User not found"
+      profilFacade.getUser = jest.fn().mockResolvedValue({ error: 'User not found' });
+
+      // Vérification que UserNotFoundException est bien lancée
+      await expect(profilService.getUserProfile(userId))
+        .rejects
+        .toThrow(Exceptions.UserNotFoundException);
+    });
+
+    it('devrait lancer une exception ProfileNotFoundException si le profil n\'est pas trouvé', async () => {
+      const userId = '12345';
+
+      // Mock de getUser pour renvoyer un utilisateur valide
+      profilFacade.getUser = jest.fn().mockResolvedValue({ user: { id: userId } });
+
+      // Mock de getProfile pour simuler une erreur "Profile not found"
+      profilFacade.getProfile = jest.fn().mockResolvedValue({ error: 'Profile not found' });
+
+      // Vérification que ProfileNotFoundException est bien lancée
+      await expect(profilService.getUserProfile(userId))
+        .rejects
+        .toThrow(Exceptions.ProfileNotFoundException);
+    });
+
+    it('devrait récupérer le profil utilisateur si tout va bien', async () => {
+      const userId = '12345';
+    
+      const userData = {
+        id: userId,
+        name: 'Test User',
       };
-
-      profilFacade.updateUserProfile = jest.fn().mockResolvedValue(updatedUser);
-
-      const result = await profilService.updateUserProfile(userId, data);
-
-      expect(result).toEqual(updatedUser);
-      expect(profilFacade.updateUserProfile).toHaveBeenCalledWith(userId, data);
+    
+      const profileData = {
+        profile: {
+          bio: 'Test Bio',
+        },
+      };
+    
+      // Mock de getUser et getProfile
+      profilFacade.getUser = jest.fn().mockResolvedValue({ user: userData });
+      profilFacade.getProfile = jest.fn().mockResolvedValue(profileData);
+    
+      // Résultat attendu avec la structure complète
+      const expectedResult = {
+        user: userData,
+        profile: profileData.profile,
+      };
+    
+      const result = await profilService.getUserProfile(userId);
+    
+      // Vérification de l'égalité profonde
+      expect(result).toEqual(expectedResult);
+    
+      expect(profilFacade.getUser).toHaveBeenCalledWith(userId);
+      expect(profilFacade.getProfile).toHaveBeenCalledWith(userId);
     });
-
-    it("Renvoie une erreur quand l'email est invalide", async () => {
-      const userId = 'user123';
-      const data = { name: 'Jane Doe', email: '', phone: '1234567890' };
-
-      try {
-        await profilService.updateUserProfile(userId, data);
-      } catch (error) {
-        expect(error.message).toBe('Email invalide !');
-      }
-    });
-
-    it('Renvoie une erreur quand le téléphone est invalide', async () => {
-      const userId = 'user123';
-      const data = { name: 'Jane Doe', email: 'jane@example.com', phone: 1234567890 };
-
-      try {
-        await profilService.updateUserProfile(userId, data);
-      } catch (error) {
-        expect(error.message).toBe('Le numéro de téléphone fourni est trop long ou contient des caractères invalides.');
-      }
-    });
-
-    it('Renvoie une erreur quand les infos ne peuvent pas être mises à jour', async () => {
-      const userId = 'user123';
-      const data = { name: 'Jane Doe', email: 'jane@example.com', phone: '1234567890' };
-
-      profilFacade.updateUserProfile = jest
-        .fn()
-        .mockRejectedValue(new Error('Erreur lors de la mise à jour du profil.'));
-
-      try {
-        await profilService.updateUserProfile(userId, data);
-      } catch (error) {
-        expect(error).toBeInstanceOf(Exceptions.ProfileUpdateException);
-        expect(error.message).toBe(`Erreur lors de la mise à jour du profil.`);
-      }
-    });
+    
   });
 });

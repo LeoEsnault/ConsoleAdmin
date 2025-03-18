@@ -154,6 +154,14 @@ const refresh = async () => {
 </template>
 
 <style scoped>
+.heriade{
+ margin-top: 2.5vh;
+ margin-left: 145px;
+ font-size: 15px;
+}
+.user-profile-section{
+  width: 100%;
+}
 .header-toolbar {
   height: 70px;
   background: linear-gradient(to right, #ffffff, #f8fafc);

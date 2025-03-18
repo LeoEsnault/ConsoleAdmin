@@ -1,5 +1,5 @@
 .text-negative {
-  color: #e53935;
+    color: #e53935;
   /* Rouge */
 }
 
@@ -114,11 +114,25 @@
   text-align: right;
 }
 
-/*forget Password */
-#formForgetPassword {
-  width: 85%;
-}
-
-#logoForgetPassword {
-  margin-top: 5vh;
-}
+  /*forget Password */
+  #formForgetPassword{
+    width: 55%;
+    margin-left: 22.5%;
+  }
+  #logoForgetPassword{
+    margin-top: 5vh;
+  }
+  @media screen and (max-width: 850px) {
+    #formForgetPassword{
+      width: 80%;
+      margin-left: 10%;
+    }
+    
+  }
+  @media screen and (min-width: 1500px) {
+    #formForgetPassword{
+      width: 40%;
+      margin-left: 30%;
+    }  
+  }
+  

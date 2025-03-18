@@ -6,14 +6,20 @@ import { SupabaseService } from '../supabase/supabase.service';
 export class ProfilFacade {
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  async getUserProfile(userId: string): Promise<any> {
+  async getUser(userId: string): Promise<any> {
     const supabase: SupabaseClient = this.supabaseService.getClient();
 
     const { data: user } = await supabase.auth.admin.getUserById(userId);
 
-    const { data } = await supabase.from('profiles').select('*').eq('auth_id', userId).single();
+    return { user };
+  }
+  async getProfile(userId: string): Promise<any> {
+    const supabase: SupabaseClient = this.supabaseService.getClient();
 
-    return { data, user };
+    const { data: profile } = await supabase.from('profiles').select('*').eq('auth_id', userId).single();
+
+
+    return { profile };
   }
 
   async updateUserProfile(userId: string, data: any): Promise<any> {
