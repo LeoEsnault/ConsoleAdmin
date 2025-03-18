@@ -5,7 +5,7 @@ import ProfileButtonMenu from './ProfileButtonMenu.vue';
 <template>
   <div class="profile-button">
     <q-btn round flat class="profile-btn">
-      <q-avatar size="40px" class="shadow-1">
+      <q-avatar size="38px" class="shadow-1">
         <q-icon name="person" size="md" class="icon-color" />
       </q-avatar>
       <q-menu transition-show="jump-down" transition-hide="jump-up" :offset="[0, 15]" class="profile-menu"
@@ -27,10 +27,6 @@ import ProfileButtonMenu from './ProfileButtonMenu.vue';
   color: var(--q-primary);
 }
 
-.profile-button {
-  position: relative;
-}
-
 .profile-btn {
   transition: transform 0.2s ease;
 }
@@ -44,4 +40,11 @@ import ProfileButtonMenu from './ProfileButtonMenu.vue';
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+@media screen and  ( max-width: 500px){
+.profile-btn{
+  margin-left: -40%;
+}
+}
+  
+
 </style>

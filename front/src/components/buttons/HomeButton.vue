@@ -4,7 +4,7 @@
       <q-item clickable v-ripple class="home-button">
         <q-item-section avatar>
           <div class="menu-icon-container">
-            <q-icon name="home" size="19px" class="iconHome" />
+            <q-icon name="home" size="25px" class="iconHome" />
           </div>
         </q-item-section>
         <q-item-section style="color: black; padding-left: 5%;">

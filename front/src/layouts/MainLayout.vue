@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted} from 'vue'
 import { useQuasar } from 'quasar'
 import LogoutButton from 'src/components/buttons/LogoutButton.vue'
 import MobileLogoutButton from 'src/components/buttons/MobileLogoutButton.vue'
@@ -15,6 +15,7 @@ const $q = useQuasar()
 let user = ref(null);
 const profilStore = useProfilStore()
 const reloadKey = ref(0);
+const userName = ref('');
 
 onMounted(() => {
   profilStore.getUserFromStorage()
@@ -33,15 +34,23 @@ const handleMouseOut = () => {
   }
 }
 
-const userName = computed(() => {
-  // TODO add lastname && firstname lorsque le correctif sur le profile sera OK
-  if (user.value?.email) return user.value.email;
-  return null;
-});
+const fetchUserName = async () => {
+  try {
+    const userProfile = await profilStore.fetchUserProfil();
+
+    if (userProfile && userProfile.firstname && userProfile.lastname) {
+      userName.value = `${userProfile.firstname} ${userProfile.lastname}`;
+    } 
+  } catch (error) {
+    console.error('Erreur récupération nom utilisateur :', error);
+  }
+};
 
 const refresh = async () => {
   reloadKey.value++;
 }
+
+onMounted(fetchUserName);
 </script>
 
 <template>
@@ -66,7 +75,7 @@ const refresh = async () => {
             <div class="right-section">
               <q-img src="/heriade-logo.png" fit="contain" class="heriade-logo" />
               <div class="user-profile-section">
-                <router-link to="/users/me" class="user-name">
+                <router-link to="/me" class="user-name">
                   {{ userName }}
                 </router-link>
                 <ProfileButton />
@@ -180,12 +189,14 @@ const refresh = async () => {
   display: flex;
   align-items: center;
   gap: 1rem;
+  
 }
 
 .right-section {
   display: flex;
   align-items: center;
   gap: 2rem;
+  margin-right: -9%;
 }
 
 .user-profile-section {
@@ -197,9 +208,10 @@ const refresh = async () => {
 }
 
 .heriade-logo {
-  width: 5rem;
+  width: 5.8rem;
   height: auto;
   transition: transform 0.2s ease;
+  margin-left: -27%;
 }
 
 .heriade-logo:hover {
@@ -209,7 +221,7 @@ const refresh = async () => {
 .user-name {
   color: var(--q-primary);
   text-decoration: none;
-  font-weight: 500;
+  font-size: small;
   transition: all 0.2s ease;
   white-space: nowrap;
 }

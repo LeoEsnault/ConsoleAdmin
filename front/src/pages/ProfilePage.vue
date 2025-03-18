@@ -1,26 +1,43 @@
 <template>
   <q-page class="column q-px-xl q-gutter-y-md flex justify-center">
-    <h2 style="color: #263286; text-align: center; font-size: xx-large;">Modifiez vos Informations</h2>
+    <h2 style="color: #263286; text-align: center; ">Modifiez vos Informations</h2>
         <q-form
           @submit="updateProfil()"
           class="q-gutter-md"
           id="formProfile"
         >
-          <div class="row" id ='inputProfile0'>
-            <p class="col-4 q-my-auto text-blue">Nom</p>
-            <q-input v-model="lastName" color="blue" outlined dense type="text" class="col-8" maxlength="40" ></q-input>
+          <div class="row" id ='inputProfile0' style="margin-left: 10%;">
+            <p class="col-md-2 q-my-auto text-blue">Nom</p>
+            <div class="col-12 col-md-7">
+            <q-input v-model="lastName" color="blue" outlined dense type="text"  maxlength="40"></q-input>
+            </div>
           </div>
-          <div class="row" id ='inputProfile1'>
-            <p class="col-4 q-my-auto text-blue">Prénom</p>
-            <q-input v-model="firstName" color="blue" outlined dense type="text" class="col-8" maxlength="40"></q-input>
+          <div class="row" style="margin-left: 10%;" id ='inputProfile1'>
+            <p class="col-md-2 q-my-auto text-blue">Prénom</p>
+            <div class="col-12 col-md-7">
+            <q-input v-model="firstName" color="blue" outlined dense type="text" maxlength="40"></q-input>
+           </div>
           </div>
-          <div class="row">
-            <p class="col-4 q-my-auto text-blue">Email</p>
-            <q-input v-model="email" color="blue" outlined dense type="email" class="col-8" maxlength="40"></q-input>
+          <div class="row" style="margin-left: 10%;">
+            <p class="col-md-2 q-my-auto text-blue">Email</p>
+            <div class="col-12 col-md-7">
+            <q-input v-model="email" color="blue" outlined dense type="email"  maxlength="40" ></q-input>
+           </div>
           </div>
-          <div class="row">
-            <p class="col-4 q-my-auto text-blue">Téléphone</p>
-            <q-input v-model="phone" color="blue" outlined dense type="phone" class="col-8" @blur="formatPhone" maxlength="20" id="inputPhone" ></q-input>
+           <div class="row" style="margin-left: 10%;">
+            <p class="col-md-2 q-my-auto text-blue">Téléphone</p>
+            <div class="col-12 col-md-7">
+              <q-input
+                v-model="phone"
+                color="blue"
+                outlined
+                dense
+                type="phone"
+                @blur="formatPhone"
+                maxlength="20"
+                id="inputPhone"
+              ></q-input>
+            </div>
           </div>
           <div class="flex flex-center q-pt-lg">
             <q-btn
@@ -124,10 +141,27 @@ const updateProfil = async () => {
   .icone:hover {
     color: #742282;
   }
+  h2{
+    font-size: xx-large;
+  }
+
   @media screen and (min-width: 1500px) {
     form {
       width: 50%;
       margin-left: 25%
+    }
+  }
+  @media screen and (max-width: 500px){
+    form{
+      margin-top: -1vh;
+      margin-left: 14%;
+    }
+
+    h2{
+      font-size: 20px;
+    }
+    div{
+      margin-left: 0% !important;
     }
   }
   </style>
