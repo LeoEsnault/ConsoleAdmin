@@ -153,6 +153,17 @@ export class UserService {
       }
     }
 
+    if (body?.profile?.enterprise_id) {
+      const { error: enterpriseError } = await userFacade.updateProfileEnterprise(
+        profile.id,
+        body.profile.enterprise_id
+      );
+
+      if (enterpriseError) {
+        throw new Exceptions.ProfileUpdateException();
+      }
+    }
+
     return {
       id,
       email: body.email,

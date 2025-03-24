@@ -4,6 +4,7 @@ import { useUsersStore } from 'src/stores/users-store.js'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
 import PopUpCard from 'src/components/card/PopUpCard.vue'
+import EditButtons from 'src/components/buttons/EditButtons.vue'
 
 describe('ManageUser Component', () => {
   let wrapper
@@ -59,13 +60,9 @@ describe('ManageUser Component', () => {
     expect(wrapper.find('#userEmailInput').exists()).toBe(false)
     expect(wrapper.find('#userLastnameInput').exists()).toBe(false)
     expect(wrapper.find('#userFirstnameInput').exists()).toBe(false)
-    expect(wrapper.find('#edit-user-button').exists()).toBe(true)
-    expect(wrapper.find('#delete-button').exists()).toBe(true)
-    expect(wrapper.find('#save-user').exists()).toBe(false)
-    expect(wrapper.find('#cancel-update').exists()).toBe(false)
 
     // clic on button
-    await wrapper.find('#edit-user-button').trigger('click')
+    await wrapper.findComponent(EditButtons).vm.$emit('edit')
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.isEditingUser).toBe(true)
 
@@ -76,10 +73,6 @@ describe('ManageUser Component', () => {
     expect(wrapper.findComponent({ ref: 'userEmailInput' }).exists()).toBe(true)
     expect(wrapper.findComponent({ ref: 'userLastnameInput' }).exists()).toBe(true)
     expect(wrapper.findComponent({ ref: 'userFirstnameInput' }).exists()).toBe(true)
-    expect(wrapper.find('#edit-user-button').exists()).toBe(false)
-    expect(wrapper.find('#delete-button').exists()).toBe(false)
-    expect(wrapper.find('#save-user').exists()).toBe(true)
-    expect(wrapper.find('#cancel-update').exists()).toBe(true)
   })
 
   it('displays input fields when clicking on edit button - MOBILE', async () => {
@@ -88,15 +81,13 @@ describe('ManageUser Component', () => {
     expect(wrapper.find('#userEmail-mobile').exists()).toBe(true)
     expect(wrapper.find('#userLastname-mobile').exists()).toBe(true)
     expect(wrapper.find('#userFirstname-mobile').exists()).toBe(true)
+
     expect(wrapper.vm.popUp).toBe(false)
 
     // clic
     await wrapper.find('#edit-user-button-mobile').trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.popUp).toBe(true)
-
-    expect(wrapper.find('#save-user').exists()).toBe(true)
-    expect(wrapper.find('#cancel-update').exists()).toBe(true)
   })
 
   it('put user form store with updated data', async () => {
@@ -108,7 +99,7 @@ describe('ManageUser Component', () => {
     wrapper.vm.userFirstname = 'Jane'
     await wrapper.vm.$nextTick()
 
-    await wrapper.find('#save-user').trigger('click')
+    await wrapper.findComponent(EditButtons).vm.$emit('save')
     await wrapper.vm.$nextTick()
 
     expect(usersStoreMock.updateUser).toHaveBeenCalledWith(1, {
@@ -135,7 +126,7 @@ describe('ManageUser Component', () => {
     expect(wrapper.vm.userLastname).toBe('Smith')
     expect(wrapper.vm.userFirstname).toBe('Jane')
 
-    await wrapper.find('#cancel-update').trigger('click')
+    await wrapper.findComponent(EditButtons).vm.$emit('cancel')
     await wrapper.vm.$nextTick()
 
     expect(wrapper.vm.userEmail).toBe(mockedUser.email)
@@ -147,13 +138,8 @@ describe('ManageUser Component', () => {
 
   // DELETE
   it('should open PopUpCard on click on delete button', async () => {
-    const deleteButton = wrapper.find('#delete-button')
-    expect(deleteButton.exists()).toBe(true)
-
     expect(wrapper.vm.showDeleteConfirm).toBe(false)
-
-    await deleteButton.trigger('click')
-
+    await wrapper.findComponent(EditButtons).vm.$emit('delete')
     expect(wrapper.vm.showDeleteConfirm).toBe(true)
   })
 

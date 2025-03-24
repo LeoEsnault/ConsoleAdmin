@@ -20,16 +20,8 @@
       </div>
 
       <div class="col text-center">
-        <div v-if="!isEditingUser">
-          <q-btn id="edit-user-button" icon="edit" round size="sm" flat color="secondary" @click="editUser()"></q-btn>
-          <q-btn id="delete-button" icon="delete" round size="sm" flat color="primary"
-            @click="showDeleteConfirm = true"></q-btn>
-        </div>
-        <div v-else>
-          <q-btn id="save-user" icon="check" round size="sm" flat color="secondary" :disable="!isUpdated"
-            @click="save(user.id)"></q-btn>
-          <q-btn id="cancel-update" icon="cancel" round size="sm" flat color="accent" @click="reset"></q-btn>
-        </div>
+        <EditButtons :isEditing="isEditingUser" :isUpdated="isUpdated" @save="save" @cancel="reset" @edit="editUser"
+          @delete="showDeleteConfirm = true" />
       </div>
     </div>
 
@@ -85,7 +77,7 @@
           </div>
           <div class="text-center">
             <q-btn id="save-user" icon="check" round size="md" flat color="secondary" :disable="!isUpdated"
-              @click="save(user.id)"></q-btn>
+              @click="save"></q-btn>
             <q-btn id="cancel-update" icon="cancel" round size="md" flat color="cancel" @click="reset"></q-btn>
           </div>
         </q-card-section>
@@ -93,8 +85,8 @@
     </q-dialog>
 
     <PopUpCardWrapper v-model="showDeleteConfirm" :title="'Confirmation'"
-      :text="'Êtes-vous sûr de vouloir supprimer cet utilisateur ?'" :loading="usersStore.loading"
-      @confirm="deleteUser(user.id)" @update:popUp="showDeleteConfirm = false" />
+      :text="'Êtes-vous sûr de vouloir supprimer cet utilisateur ?'" :loading="usersStore.loading" @confirm="deleteUser"
+      @update:popUp="showDeleteConfirm = false" />
   </div>
 </template>
 
@@ -104,6 +96,8 @@ import { useUsersStore } from 'src/stores/users-store.js'
 import { useQuasar } from 'quasar'
 import { checkEmail } from 'src/utils/helpers'
 import PopUpCardWrapper from 'src/components/card/PopUpCardWrapper.vue'
+import EditButtons from "../buttons/EditButtons.vue";
+
 
 const $q = useQuasar()
 const emit = defineEmits(['deleteUser'])
@@ -155,7 +149,7 @@ const reset = () => {
   popUp.value = false
 }
 
-const save = async (id) => {
+const save = async () => {
   if (!checkEmail(userEmail.value, $q)) return
 
   const data = {
@@ -166,7 +160,7 @@ const save = async (id) => {
     },
   }
 
-  const response = await usersStore.updateUser(id, data)
+  const response = await usersStore.updateUser(props.user.id, data)
   $q.notify({
     type: response?.type,
     message: response?.message
@@ -182,9 +176,10 @@ const save = async (id) => {
   popUp.value = false
 }
 
-const deleteUser = async (id) => {
-  const response = await usersStore.deleteUser(id)
-  if (response?.data) {
+const deleteUser = async () => {
+  const response = await usersStore.deleteUser(props.user.id)
+
+  if (response?.type === "positive") {
     emit('deleteUser')
   }
 

@@ -149,7 +149,7 @@ describe('Users Store', () => {
 
     it('handles error when deleting a user', async () => {
       const errorResponse = {
-        type: 'positive',
+        type: 'negative',
         message: 'Une erreur est survenue.',
       }
 

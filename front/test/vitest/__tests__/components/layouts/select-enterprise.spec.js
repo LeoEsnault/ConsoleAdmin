@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import SelectEnterprise from '@/components/users/SelectEnterprise.vue'
+import SelectEnterprise from '@/components/layouts/SelectEnterprise.vue'
 import { useEnterpriseStore } from '@/stores/enterprise-store'
 import { useUsersStore } from '@/stores/users-store'
 import { getUserFromStorage } from '@/utils/getUserFromStorage'

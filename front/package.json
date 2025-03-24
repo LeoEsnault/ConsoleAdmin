@@ -18,7 +18,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@quasar/extras": "^1.16.4",
+    "@quasar/extras": "^1.16.17",
     "@supabase/supabase-js": "^2.49.1",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",

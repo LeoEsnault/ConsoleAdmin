@@ -1,12 +1,12 @@
 <script setup>
-import { ref, onMounted} from 'vue'
+import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import LogoutButton from 'src/components/buttons/LogoutButton.vue'
 import MobileLogoutButton from 'src/components/buttons/MobileLogoutButton.vue'
 import ProfileButton from 'src/components/buttons/ProfileButton.vue'
-import HomeButton from 'src/components/buttons/HomeButton.vue'
+import SideMenu from 'src/components/layouts/SideMenu.vue'
 import { useProfilStore } from "src/stores/profil-store";
-import SelectEnterprise from 'src/components/users/SelectEnterprise.vue'
+import SelectEnterprise from 'src/components/layouts/SelectEnterprise.vue'
 
 const drawer = ref(true)
 const mobileDrawerOpen = ref(false)
@@ -20,6 +20,7 @@ const userName = ref('');
 onMounted(() => {
   profilStore.getUserFromStorage()
   user.value = profilStore.user; // TODO : à revoir avec toutes les infos profiles
+  fetchUserName()
 });
 
 const handleMouseOver = () => {
@@ -40,7 +41,7 @@ const fetchUserName = async () => {
 
     if (userProfile && userProfile.firstname && userProfile.lastname) {
       userName.value = `${userProfile.firstname} ${userProfile.lastname}`;
-    } 
+    }
   } catch (error) {
     console.error('Erreur récupération nom utilisateur :', error);
   }
@@ -49,8 +50,6 @@ const fetchUserName = async () => {
 const refresh = async () => {
   reloadKey.value++;
 }
-
-onMounted(fetchUserName);
 </script>
 
 <template>
@@ -89,7 +88,8 @@ onMounted(fetchUserName);
       <!-- Modern Sidebar -->
       <q-drawer v-model="drawer" :mini="miniState" @mouseover="handleMouseOver" @mouseout="handleMouseOut" :width="280"
         :breakpoint="500" bordered class="modern-drawer" :mini-width="70" behavior="desktop" show-if-above>
-        <HomeButton />
+        <SideMenu />
+
         <!-- Logout Section -->
         <LogoutButton />
       </q-drawer>
@@ -128,7 +128,8 @@ onMounted(fetchUserName);
       <!-- Mobile Drawer -->
       <q-drawer v-model="mobileDrawerOpen" side="left" overlay behavior="mobile" :breakpoint="500" class="modern-drawer"
         bordered>
-        <HomeButton />
+        <SideMenu />
+
         <!-- Mobile Logout Section -->
         <MobileLogoutButton />
       </q-drawer>
@@ -137,11 +138,9 @@ onMounted(fetchUserName);
       <q-footer class="modern-footer" bordered>
         <q-toolbar class="justify-around">
           <q-btn dense flat round icon="menu" class="footer-btn" size="md" @click="mobileDrawerOpen = true">
-            <i class="fa-solid fa-bars text-white"></i>
           </q-btn>
 
           <q-btn dense flat round icon="home" class="footer-btn" size="md" to="/">
-            <i class="fa-solid fa-suitcase text-white"></i>
           </q-btn>
 
           <!--  En commentaire pour faire plus propre en attendant le lien avec l'app.heriade
@@ -163,14 +162,14 @@ onMounted(fetchUserName);
 </template>
 
 <style scoped>
-.heriade{
- margin-top: 2.5vh;
- margin-left: 145px;
- font-size: 15px;
+.user-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 1.5rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
 }
-.user-profile-section{
-  width: 100%;
-}
+
 .header-toolbar {
   height: 70px;
   background: linear-gradient(to right, #ffffff, #f8fafc);
@@ -189,29 +188,18 @@ onMounted(fetchUserName);
   display: flex;
   align-items: center;
   gap: 1rem;
-  
 }
 
 .right-section {
   display: flex;
   align-items: center;
   gap: 2rem;
-  margin-right: -9%;
-}
-
-.user-profile-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding-left: 1.5rem;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .heriade-logo {
-  width: 5.8rem;
+  width: 5rem;
   height: auto;
   transition: transform 0.2s ease;
-  margin-left: -27%;
 }
 
 .heriade-logo:hover {
@@ -221,7 +209,7 @@ onMounted(fetchUserName);
 .user-name {
   color: var(--q-primary);
   text-decoration: none;
-  font-size: small;
+  font-weight: 500;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
@@ -229,6 +217,7 @@ onMounted(fetchUserName);
 .user-name:hover {
   opacity: 0.8;
   transform: translateY(-1px);
+  text-decoration: none;
 }
 
 .logo-container {
@@ -251,27 +240,6 @@ onMounted(fetchUserName);
   object-fit: contain;
 }
 
-.modern-drawer {
-  background: white;
-}
-
-.user-profile-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.user-name {
-  color: var(--q-primary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.user-name:hover {
-  text-decoration: none;
-  opacity: 0.8;
-}
 
 /* Mobile Styles */
 .mobile-toolbar {
@@ -293,7 +261,7 @@ onMounted(fetchUserName);
 }
 
 .modern-footer {
-  background: white;
+  background: var(--q-primary);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   height: 60px;
 }
@@ -324,16 +292,6 @@ onMounted(fetchUserName);
   }
 }
 
-.profile-button {
-  border-radius: 0.5rem;
-}
-
-.modern-footer {
-  background: var(--q-primary);
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  height: 60px;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
   .header-toolbar {
@@ -349,6 +307,7 @@ onMounted(fetchUserName);
 
 /* Dans la section style */
 .modern-drawer {
+  background: white;
   transition: width 0.3s ease;
 }
 </style>

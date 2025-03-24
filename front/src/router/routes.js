@@ -3,12 +3,21 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [  
-      { path: '', component: () => import('pages/UsersPage.vue') }, 
+    children: [
+      { path: '', component: () => import('pages/UsersPage.vue') },
       { path: '/me', component: () => import('pages/ProfilePage.vue') }
     ],
     meta: { requiresAuth: true }
   },
+  {
+    path: '/admin',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: 'establishments', component: () => import('pages/admin/EstablishmentsPage.vue') },
+    ],
+    meta: { requiresAuth: true }
+  },
+
   {
     path: '/login',
     component: () => import('src/pages/LoginUserPage.vue'),
@@ -55,4 +64,4 @@ routes.forEach(route => {
   }
 });
 
-export default routes 
+export default routes

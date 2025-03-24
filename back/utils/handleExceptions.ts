@@ -7,20 +7,24 @@ const groupedExceptions: Partial<Record<HttpStatus, Function[]>> = {
     Exceptions.ProfileNotFoundException,
     Exceptions.EnterpriseNotFoundException,
     Exceptions.RoleNotFoundException,
+    Exceptions.EstablishmentNotFoundException,
   ],
   [HttpStatus.BAD_REQUEST]: [
     Exceptions.UserCreationException,
     Exceptions.InvalidEmailFormatException,
     Exceptions.InvalidUserDataException,
     Exceptions.SuperAdminDeleteException,
+    Exceptions.InvalidEstablishmentDataException,
+    Exceptions.EstablishmentCreationException,
   ],
   [HttpStatus.INTERNAL_SERVER_ERROR]: [
     Exceptions.ProfileCreationException,
     Exceptions.ProfileUpdateException,
     Exceptions.DatabaseException,
     Exceptions.UserDeleteException,
+    Exceptions.DatabaseQueryException,
   ],
-  [HttpStatus.CONFLICT]: [Exceptions.UserAlreadyExistsException],
+  [HttpStatus.CONFLICT]: [Exceptions.UserAlreadyExistsException, Exceptions.EstablishmentAlreadyExistsException],
 };
 
 // Map : exception with HttpStatus

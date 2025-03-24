@@ -95,7 +95,7 @@ async function handleLogin() {
 // Fonction pour récupérer le rôle et rediriger
 async function redirectBasedOnRole(user_id) {
   const { type, message } = await authStore.fetchUserRole(user_id)
-  await enterpriseStore.getEnterprise(user_id)
+  await enterpriseStore.getEnterprise()
 
   if (type === 'error') {
     $q.notify({

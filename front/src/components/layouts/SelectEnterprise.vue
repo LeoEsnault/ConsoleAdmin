@@ -42,7 +42,7 @@ const updateUserEnterprise = async () => {
 
     const response = await usersStore.updateUser(user.id, data)
 
-    await enterpriseStore.getEnterprise(user.id)
+    await enterpriseStore.getEnterprise()
 
     emit('update')
 

@@ -21,7 +21,16 @@ export const getProfiles = async (userIds: string | string[]) => {
 };
 
 export const getEnterprise = async (enterpriseId: string) => {
-  return await supabase.from('enterprises').select('*').eq('id', enterpriseId).single();
+  return await supabase
+    .from('enterprises')
+    .select(
+      `
+    *,
+    establishments (*)
+  `
+    )
+    .eq('id', enterpriseId)
+    .single();
 };
 
 export const createPagination = async () => {
@@ -37,7 +46,7 @@ export const createUser = async (email: string) => {
   });
 };
 
-export const createRole = async (id) => {
+export const createRole = async (id: string) => {
   return await supabase
     .from('user_roles')
     .insert([
@@ -83,9 +92,9 @@ export const updateProfile = async (profileId: string, lastname: string, firstna
 
 export const updateProfileEnterprise = async (profileId: string, enterpriseId: string) => {
   return await supabase.from('profiles').update({ enterprise_id: enterpriseId }).eq('id', profileId);
-}
+};
 
-export const getRole = async (id) => {
+export const getRole = async (id: string) => {
   return await supabase.from('user_roles').select().eq('user_id', id).single();
 };
 

@@ -2,8 +2,12 @@ import { setActivePinia, createPinia } from 'pinia'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { api } from 'src/boot/axios';
 import { useEnterpriseStore } from 'src/stores/enterprise-store.js'
+import { getUserFromStorage } from 'src/utils/helpers'
 
 vi.mock('src/boot/axios');
+vi.mock('src/utils/helpers', () => ({
+  getUserFromStorage: vi.fn()
+}));
 
 describe('Enteprise Store', () => {
   let store
@@ -21,14 +25,18 @@ describe('Enteprise Store', () => {
   })
 
   describe('Get Enterprise', () => {
-    const mockId = "user-123"
+    const mockUser = { id: "user-123" };
+
+    beforeEach(() => {
+      getUserFromStorage.mockReturnValue(mockUser);
+    });
 
     it('fetches the enterprise of connected user', async () => {
       const mockEnterprise = { id: "ent-123", name: "Hello" };
       api.get.mockResolvedValueOnce({ data: mockEnterprise })
 
-      await store.getEnterprise(mockId)
-      expect(api.get).toHaveBeenCalledWith(`/users/${mockId}/enterprise`);
+      await store.getEnterprise()
+      expect(api.get).toHaveBeenCalledWith(`/users/${mockUser.id}/enterprise`);
       expect(store.enterprise).toEqual(mockEnterprise);
       const savedEnterprise = JSON.parse(localStorage.getItem('enterprise'));
       expect(savedEnterprise).toEqual(mockEnterprise);
@@ -37,9 +45,9 @@ describe('Enteprise Store', () => {
     it('handles error when fetching the enterprise', async () => {
       api.get.mockRejectedValueOnce(new Error('Erreur lors de la récupération des données'));
 
-      await store.getEnterprise(mockId);
+      await store.getEnterprise();
 
-      expect(api.get).toHaveBeenCalledWith(`/users/${mockId}/enterprise`);
+      expect(api.get).toHaveBeenCalledWith(`/users/${mockUser.id}/enterprise`);
       expect(store.enterprise).toStrictEqual({});
     });
   })

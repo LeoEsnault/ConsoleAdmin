@@ -1,27 +1,27 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import AddUser from 'src/components/users/AddUser.vue'
+import AddItemInput from 'src/components/card/AddItemInput.vue'
 import AddButton from 'src/components/buttons/AddButton.vue'
 
-describe('AddUser', () => {
-  it('disables AddButton when userEmail is empty', async () => {
-    const wrapper = mount(AddUser)
+describe('AddItemInput', () => {
+  it('disables AddButton when itemValue is empty', async () => {
+    const wrapper = mount(AddItemInput)
 
     const button = wrapper.findComponent(AddButton)
 
     expect(button.props().disable).toBe(true)
 
-    wrapper.vm.userEmail = 'test@example.com'
+    wrapper.vm.itemValue = 'hello'
     await wrapper.vm.$nextTick()
 
     expect(button.props().disable).toBe(false)
   })
 
-  it('emits a "click" and resets userEmail after successful addition', async () => {
-    const wrapper = mount(AddUser)
+  it('emits a "click" and resets itemValue after successful addition', async () => {
+    const wrapper = mount(AddItemInput)
 
     // Simule data & clic
-    wrapper.vm.userEmail = 'test@example.com'
+    wrapper.vm.itemValue = 'hello'
     await wrapper.vm.$nextTick()
 
     await wrapper.findComponent(AddButton).trigger('click')
@@ -29,7 +29,7 @@ describe('AddUser', () => {
     // émission clic
     const emitted = wrapper.emitted('click')
     expect(emitted).toBeTruthy()
-    expect(emitted[0]).toEqual(['test@example.com', expect.any(Function)])
+    expect(emitted[0]).toEqual(['hello', expect.any(Function)])
 
     // simule resolve
     const resolve = emitted[0][1]
@@ -37,33 +37,33 @@ describe('AddUser', () => {
     resolve(true)
 
     await wrapper.vm.$nextTick()
-    expect(wrapper.vm.userEmail).toBe('')
+    expect(wrapper.vm.itemValue).toBe('')
   })
 
-  it('emits a "click" and does not reset userEmail after failed addition', async () => {
-    const wrapper = mount(AddUser)
+  it('emits a "click" and does not reset itemValue after failed addition', async () => {
+    const wrapper = mount(AddItemInput)
 
-    wrapper.vm.userEmail = 'test@example.com'
+    wrapper.vm.itemValue = 'hello'
     await wrapper.vm.$nextTick()
 
     await wrapper.findComponent(AddButton).trigger('click')
 
     const emitted = wrapper.emitted('click')
     expect(emitted).toBeTruthy()
-    expect(emitted[0]).toEqual(['test@example.com', expect.any(Function)])
+    expect(emitted[0]).toEqual(['hello', expect.any(Function)])
 
     const resolve = emitted[0][1]
     expect(typeof resolve).toBe('function')
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
     resolve(false)
 
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.vm.userEmail).toBe('test@example.com')
+    expect(wrapper.vm.itemValue).toBe('hello')
 
-    expect(consoleSpy).toHaveBeenCalledWith("Erreur lors de l'ajout de l'utilisateur.")
+    expect(consoleSpy).toHaveBeenCalledWith("Erreur lors de l'ajout.")
 
     consoleSpy.mockRestore()
   })
