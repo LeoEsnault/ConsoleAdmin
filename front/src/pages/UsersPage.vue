@@ -1,7 +1,7 @@
 <template>
-  <q-page class="column flex justify-center">
+  <q-page class="column flex">
     <!-- DESKTOP -->
-    <div v-if="$q.screen.gt.sm" class="column q-px-xl q-gutter-y-md">
+    <div v-if="$q.screen.gt.sm" class="column q-px-xl q-py-xl q-gutter-y-md">
       <AddItemInput label="Ajouter un utilisateur (email):" itemType="email"
         buttonText="Une seule adresse email par utilisateur." @click="addUser" />
       <div class="q-gutter-y-md">
@@ -16,8 +16,14 @@
           <SkeletonText v-for="n in 3" :key="n" class="q-ma-xs" />
         </div>
 
-        <div v-else v-for="user in users" :key="user.id" class="q-px-md">
-          <manage-user :user="user" class="col" @deleteUser="refresh()" />
+        <div v-else class="q-gutter-y-md">
+          <div v-if="users.length <= 0" class="text-grey-7 q-pa-md text-center">
+            Aucun utilisateur.
+          </div>
+
+          <div v-else v-for="user in users" :key="user.id" class="q-px-md">
+            <ManageUser :user="user" class="col" @deleteUser="refresh()" />
+          </div>
         </div>
       </div>
       <q-pagination ref="pagination" v-if="totalPages > 1 && !isLoading" v-model="currentPage" color="primary"
@@ -26,7 +32,7 @@
     </div>
 
     <!-- MOBILE -->
-    <div v-else class="column content-center q-pa-sm">
+    <div v-else class="column content-center q-pa-sm q-py-lg">
       <AddItemInput label="Ajouter un utilisateur (email):" itemType="email"
         buttonText="Une seule adresse email par utilisateur." @click="addUser" />
 
@@ -35,9 +41,16 @@
           <SkeletonRange v-for="n in 3" :key="n" class="q-ma-xs" style="width: 80vw" />
         </div>
 
-        <div v-else v-for="user in users" :key="user.id" class="q-px-md" style="width: 90vw">
-          <manage-user :user="user" class="col" @deleteUser="refresh()" />
+        <div v-else class="q-gutter-y-md">
+          <div v-if="users.length <= 0" class="text-grey-7 q-pa-md text-center">
+            Aucun utilisateur.
+          </div>
+
+          <div v-else v-for="user in users" :key="user.id" class="q-px-md" style="width: 90vw">
+            <ManageUser :user="user" class="col" @deleteUser="refresh()" />
+          </div>
         </div>
+
       </div>
       <q-pagination ref="pagination" v-if="totalPages > 1 && !isLoading" v-model="currentPage" color="primary"
         :max="totalPages" :max-pages="6" boundary-numbers class="self-center q-mt-md" @update:modelValue="fetchUsers" />

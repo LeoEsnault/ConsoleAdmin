@@ -77,6 +77,11 @@ const menuList = [
         label: "Établissements",
         link: "/admin/establishments",
       },
+      {
+        icon: "fa-solid fa-briefcase",
+        label: "Services",
+        link: "/admin/services",
+      },
     ],
   },
 

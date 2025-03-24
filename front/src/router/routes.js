@@ -15,6 +15,7 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: 'establishments', component: () => import('pages/admin/EstablishmentsPage.vue') },
+      { path: 'services', component: () => import('pages/admin/ServicesPage.vue') },
     ],
     meta: { requiresAuth: true }
   },

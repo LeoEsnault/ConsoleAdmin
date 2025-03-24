@@ -6,10 +6,11 @@ import { UserModule } from './user/user.module';
 import { EnterpriseModule } from './enterprise/enterprise.module';
 import { ProfilModule } from './profil/profil.module';
 import { EstablishmentModule } from './establishment/establishment.module';
+import { ServiceModule } from './service/service.module';
 import { UpdatePasswordModule } from './updatePassword/updatePassword.module';
 
 @Module({
-  imports: [SupabaseModule, UserModule, EnterpriseModule, ProfilModule, UpdatePasswordModule, EstablishmentModule],
+  imports: [SupabaseModule, UserModule, EnterpriseModule, ProfilModule, UpdatePasswordModule, EstablishmentModule, ServiceModule],
   controllers: [AppController],
   providers: [AppService],
 })

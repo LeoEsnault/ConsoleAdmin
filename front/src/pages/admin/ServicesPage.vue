@@ -1,15 +1,15 @@
 <template>
-  <q-page class="column flex ">
+  <q-page class="column flex">
     <!-- Version Desktop -->
     <div v-if="$q.screen.gt.sm" class="column q-px-xl q-py-xl q-gutter-y-md">
-      <AddItemInput label="Ajouter un établissement:" itemType="text"
-        buttonText="Vous ne pouvez pas créer un établissement ayant un nom déjà utilisé." @click="addEstablishment" />
+      <AddItemInput label="Ajouter un service:" itemType="text"
+        buttonText="Vous ne pouvez pas créer un service ayant un nom déjà utilisé." @click="addService" />
 
       <div class="q-gutter-y-md">
-        <div class="bg-grey-11 row q-py-md q-px-md rounded-borders text-caption">
+        <div class="row bg-grey-11 q-py-md q-gutter-x-md rounded-borders text-caption">
           <div class="col-1"></div>
-          <span class="col-2">Établissements</span>
-          <div class="col-5"></div>
+          <span class="col-2">Services</span>
+          <span class="col-5"></span>
         </div>
 
         <div v-if="isLoading" class="q-px-xs">
@@ -17,13 +17,12 @@
         </div>
 
         <div v-else class="q-gutter-y-md">
-          <div v-if="enterpriseData?.establishments.length <= 0" class="text-grey-7 q-pa-md text-center">
-            Aucun établissement.
+          <div v-if="enterpriseData?.services.length <= 0">
+            Aucun service.
           </div>
 
-          <div v-else v-for="(establishment) in enterpriseData?.establishments" :key="establishment.id" class="q-px-md">
-            <ManageEstablishment id="ManageEstablishment" :establishment="establishment"
-              @deleteEstablishment="fetchEnterprise()" class="col" />
+          <div v-for="(service, i) of enterpriseData?.services" :key="i" class="row q-gutter-x-md">
+            <ManageService id="ManageService" :service="service" @deleteService="fetchEnterprise()" class="col" />
           </div>
         </div>
       </div>
@@ -31,8 +30,8 @@
 
     <!-- Version Mobile -->
     <div v-else class="column content-center q-pa-sm q-py-lg">
-      <AddItemInput label="Ajouter un établissement:" itemType="text"
-        buttonText="Vous ne pouvez pas créer un établissement ayant un nom déjà utilisé." @click="addEstablishment" />
+      <AddItemInput label="Ajouter un service:" itemType="text"
+        buttonText="Vous ne pouvez pas créer un service ayant un nom déjà utilisé." @click="addService" />
 
       <div class="q-gutter-y-md">
         <div v-if="isLoading" class="q-px-xs">
@@ -40,13 +39,13 @@
         </div>
 
         <div v-else class="q-gutter-y-md">
-          <div v-if="enterpriseData?.establishments.length <= 0" class="text-grey-7 q-pa-md text-center">
+          <div v-if="enterpriseData?.services.length <= 0" class="text-grey-7 q-pa-md text-center">
             Aucun établissement.
           </div>
 
-          <div v-else v-for="(establishment) in enterpriseData?.establishments" :key="establishment.id" class="q-px-md"
+          <div v-else v-for="(service) in enterpriseData?.services" :key="service.id" class="q-px-md"
             style="width: 90vw">
-            <ManageEstablishment :establishment="establishment" @deleteEstablishment="fetchEnterprise()" class="col" />
+            <ManageService id="ManageService" :service="service" @deleteService="fetchEnterprise()" class="col" />
           </div>
         </div>
       </div>
@@ -56,20 +55,21 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useQuasar } from 'quasar';
-import { useEstablishmentsStore } from "src/stores/establishments-store";
-import ManageEstablishment from "src/components/establishments/ManageEstablishment.vue";
+import { useQuasar } from "quasar";
 import { useEnterpriseStore } from "src/stores/enterprise-store";
+import { useServicesStore } from "src/stores/services-store";
+import ManageService from "src/components/services/ManageService.vue";
 import SkeletonText from 'src/components/skeletons/SkeletonText.vue'
 import SkeletonRange from "src/components/skeletons/SkeletonRange.vue";
 import AddItemInput from "src/components/card/AddItemInput.vue";
 
+
 const $q = useQuasar()
 const enterpriseStore = useEnterpriseStore()
 const isLoading = ref(true)
-const establishmentsStore = useEstablishmentsStore()
+const servicesStore = useServicesStore()
 const enterpriseData = ref(null)
-const newEstablishment = ref(null);
+const newService = ref(null);
 
 onMounted(async () => {
   try {
@@ -81,22 +81,23 @@ onMounted(async () => {
 
 const fetchEnterprise = async () => {
   enterpriseData.value = await enterpriseStore.getEnterprise()
+  console.log('DTA', enterpriseData.value)
 }
 
-const addEstablishment = async (name, callback) => {
+const addService = async (name, callback) => {
   const data = {
     name
   }
 
-  const response = await establishmentsStore.addEstablishment(data)
+  const response = await servicesStore.addService(data)
 
   if (!response?.data) {
     if (typeof callback === 'function') {
       callback(false)
     }
   } else {
-    enterpriseData.value.establishments.push(response.data);
-    newEstablishment.value = "";
+    enterpriseData.value.services.push(response.data);
+    newService.value = "";
     if (typeof callback === 'function') {
       callback(true)
     }

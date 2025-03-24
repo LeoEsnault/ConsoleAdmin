@@ -26,8 +26,9 @@ export const getEnterprise = async (enterpriseId: string) => {
     .select(
       `
     *,
-    establishments (*)
-  `
+    establishments (*),
+    services (*)
+     `
     )
     .eq('id', enterpriseId)
     .single();

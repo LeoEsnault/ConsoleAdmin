@@ -12,14 +12,16 @@
         <div class="establishmentName">{{ establishmentName }}</div>
       </div>
 
-      <div class="col-1 text-center">
+      <div class="col-5"></div>
+
+      <div class="col text-center">
         <EditButtons :isEditing="editingEsta" :isUpdated="isUpdated" @save="save" @cancel="reset" @edit="editEsta"
           @delete="deleteEstablishment" />
       </div>
     </div>
 
     <!-- Version Mobile -->
-    <div class="mobile-only" style="max-width: 50rem">
+    <div class="mobile-only col col-12" style="max-width: 50rem">
       <q-list bordered class="rounded-borders">
         <q-expansion-item expand-separator>
           <template v-slot:header>
