@@ -60,7 +60,7 @@ export const useProfilStore = defineStore('profil', {
         if (error) {
           return { error };
         }
-
+        console.log(response)
         return {
           data: response,
         };

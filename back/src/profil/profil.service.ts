@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { ProfilFacade } from './profil.facade';
 import * as Exceptions from '../exceptions';
-import { isValidEmail, isValidPhone } from '../../utils/isValidEmail';
+import { isValidEmail, isValidPhone, MAX_NAME_LENGTH } from '../../utils/isValidEmail';
 
 @Injectable()
 export class ProfilService {
   constructor(private readonly profilFacade: ProfilFacade) {}
 
   async getUserProfile(userId: string) {
-    const { user, error: getUserError } = await this.profilFacade.getUser(userId);
+    const { data: user, error: getUserError } = await this.profilFacade.getUser(userId);
     if (getUserError || !user) {
       throw new Exceptions.UserNotFoundException();
     }
   
-    const profileResponse = await this.profilFacade.getProfile(userId);
-    const { profile, error: getProfileError } = profileResponse || {}; 
+    const {error: getProfileError, data: profile} = await this.profilFacade.getProfile(userId);
+   
     if (getProfileError || !profile) {
       throw new Exceptions.ProfileNotFoundException();
     }
@@ -27,31 +27,33 @@ export class ProfilService {
   async updateUserProfile(userId: string, data: any) {
     const { phone, email, firstname, lastname } = data;
 
-    if (lastname && lastname.length > 40) {
-      throw new Exceptions.InvalidFormatException('Le nom fourni est trop long ou contient des caractères invalides.');
-    }
-    if (firstname && firstname.length > 40) {
-      throw new Exceptions.InvalidFormatException(
-        'Le prénom fourni est trop long ou contient des caractères invalides.'
-      );
-    }
-    if (!isValidPhone(phone)) {
-      throw new Exceptions.InvalidFormatException(
-        'Le numéro de téléphone fourni est trop long ou contient des caractères invalides.'
-      );
-    }
-    if (!isValidEmail(email)) {
-      throw new Exceptions.InvalidEmailFormatException();
+    if (lastname && lastname.length > MAX_NAME_LENGTH || firstname && firstname.length > MAX_NAME_LENGTH) {
+      throw new Exceptions.InvalidFormatException('Le nom ou le prénom fourni est trop long ou contient des caractères invalides.');
     }
 
-    try {
-      return await this.profilFacade.updateUserProfile(userId, data);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du profil utilisateur:', error);
-      throw new Exceptions.ProfileUpdateException(
-        error,
-        `Erreur lors de la mise à jour du profil utilisateur ${userId}`
+    if (!isValidPhone(phone) || !isValidEmail(email) ) {
+  
+      throw new Exceptions.InvalidFormatException(
+        'Le numéro de téléphone ou l\'adresse email fourni ne sont pas valides.'
       );
     }
-  }
-}
+      const {data: profilUpdateAuth, error: profilUpdateAuthError} = await this.profilFacade.updateAuth(userId, data);
+      
+      if ( profilUpdateAuthError) {
+        throw new Exceptions.ProfileUpdateException();
+      }
+
+      const {data: profilUpdate, error: profilUpdateError} = await this.profilFacade.updateProfile(userId, data);
+
+      if ( profilUpdateError) {
+        throw new Exceptions.ProfileUpdateException();
+      }
+
+      return { profilUpdateAuth, profilUpdate}
+
+
+
+    } 
+    }
+  
+

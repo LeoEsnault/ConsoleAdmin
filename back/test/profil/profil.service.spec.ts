@@ -1,116 +1,85 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilService } from '../../src/profil/profil.service';
 import { ProfilFacade } from '../../src/profil/profil.facade';
 import * as Exceptions from '../../src/exceptions';
-import { isValidEmail, isValidPhone } from '../../utils/isValidEmail';
+import { isValidEmail, isValidPhone, MAX_NAME_LENGTH } from '../../utils/isValidEmail';
 
-jest.mock('../../utils/isValidEmail', () => ({
-  isValidEmail: jest.fn(),
-  isValidPhone: jest.fn(),
-}));
+jest.mock('../../src/profil/profil.facade');
 
 describe('ProfilService', () => {
   let profilService: ProfilService;
-  let profilFacade: ProfilFacade;
+  let profilFacade: jest.Mocked<ProfilFacade>;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ProfilService,
-        {
-          provide: ProfilFacade,
-          useValue: {
-            getUser: jest.fn(),
-            getProfile: jest.fn(),
-            updateUserProfile: jest.fn(),
-          },
-        },
-      ],
-    }).compile();
-
-    profilService = module.get<ProfilService>(ProfilService);
-    profilFacade = module.get<ProfilFacade>(ProfilFacade);
-  });
-
-  it('service existe', () => {
-    expect(profilService).toBeDefined();
-  });
-
-  describe('updateUserProfile', () => {
-    it('devrait lancer une exception si la mise à jour échoue', async () => {
-      const userId = '12345';
-      const data = { name: 'Test' };
-
-      // Simulation de l'échec lors de la mise à jour du profil
-      profilFacade.updateUserProfile = jest.fn().mockRejectedValue(new Error('Erreur lors de la mise à jour du profil'));
-
-      // Vérification que l'exception ProfileUpdateException est bien levée
-      await expect(profilService.updateUserProfile(userId, data))
-        .rejects
-        .toThrow(Exceptions.InvalidFormatException);
-    });
+  beforeEach(() => {
+    profilFacade = {
+      getUser: jest.fn(),
+      getProfile: jest.fn(),
+      updateAuth: jest.fn(),
+      updateProfile: jest.fn(),
+    } as unknown as jest.Mocked<ProfilFacade>;
+    
+    profilService = new ProfilService(profilFacade);
   });
 
   describe('getUserProfile', () => {
-    it('devrait lancer une exception UserNotFoundException si l\'utilisateur n\'est pas trouvé', async () => {
-      const userId = '12345';
+    it('devrait retourner le profil utilisateur si tout est bon', async () => {
+      profilFacade.getUser.mockResolvedValue({ data: { id: '123', name: 'Test' }, error: null });
+      profilFacade.getProfile.mockResolvedValue({ data: { age: 30 }, error: null });
 
-      // Mock de getUser pour renvoyer une erreur de type "User not found"
-      profilFacade.getUser = jest.fn().mockResolvedValue({ error: 'User not found' });
+      const result = await profilService.getUserProfile('123');
 
-      // Vérification que UserNotFoundException est bien lancée
-      await expect(profilService.getUserProfile(userId))
-        .rejects
-        .toThrow(Exceptions.UserNotFoundException);
+      expect(result).toEqual({ user: { id: '123', name: 'Test' }, profile: { age: 30 } });
     });
 
-    it('devrait lancer une exception ProfileNotFoundException si le profil n\'est pas trouvé', async () => {
-      const userId = '12345';
+    it('devrait lever une exception si l’utilisateur est introuvable', async () => {
+      profilFacade.getUser.mockResolvedValue({ data: null, error: true });
 
-      // Mock de getUser pour renvoyer un utilisateur valide
-      profilFacade.getUser = jest.fn().mockResolvedValue({ user: { id: userId } });
-
-      // Mock de getProfile pour simuler une erreur "Profile not found"
-      profilFacade.getProfile = jest.fn().mockResolvedValue({ error: 'Profile not found' });
-
-      // Vérification que ProfileNotFoundException est bien lancée
-      await expect(profilService.getUserProfile(userId))
-        .rejects
-        .toThrow(Exceptions.ProfileNotFoundException);
+      await expect(profilService.getUserProfile('123')).rejects.toThrow(Exceptions.UserNotFoundException);
     });
 
-    it('devrait récupérer le profil utilisateur si tout va bien', async () => {
-      const userId = '12345';
-    
-      const userData = {
-        id: userId,
-        name: 'Test User',
-      };
-    
-      const profileData = {
-        profile: {
-          bio: 'Test Bio',
-        },
-      };
-    
-      // Mock de getUser et getProfile
-      profilFacade.getUser = jest.fn().mockResolvedValue({ user: userData });
-      profilFacade.getProfile = jest.fn().mockResolvedValue(profileData);
-    
-      // Résultat attendu avec la structure complète
-      const expectedResult = {
-        user: userData,
-        profile: profileData.profile,
-      };
-    
-      const result = await profilService.getUserProfile(userId);
-    
-      // Vérification de l'égalité profonde
-      expect(result).toEqual(expectedResult);
-    
-      expect(profilFacade.getUser).toHaveBeenCalledWith(userId);
-      expect(profilFacade.getProfile).toHaveBeenCalledWith(userId);
+    it('devrait lever une exception si le profil est introuvable', async () => {
+      profilFacade.getUser.mockResolvedValue({ data: { id: '123' }, error: null });
+      profilFacade.getProfile.mockResolvedValue({ data: null, error: true });
+
+      await expect(profilService.getUserProfile('123')).rejects.toThrow(Exceptions.ProfileNotFoundException);
     });
-    
+  });
+
+  describe('updateUserProfile', () => {
+    it('devrait lever une exception si le nom ou prénom est trop long', async () => {
+      const data = { firstname: 'A'.repeat(MAX_NAME_LENGTH + 1), lastname: 'Doe', email: 'test@test.com', phone: '0612345678' };
+
+      await expect(profilService.updateUserProfile('123', data)).rejects.toThrow(Exceptions.InvalidFormatException);
+    });
+
+    it('devrait lever une exception si l’email ou téléphone est invalide', async () => {
+      const data = { firstname: 'John', lastname: 'Doe', email: 'invalid', phone: '0000' };
+
+      await expect(profilService.updateUserProfile('123', data)).rejects.toThrow(Exceptions.InvalidFormatException);
+    });
+
+    it('devrait lever une exception si updateAuth échoue', async () => {
+      const data = { firstname: 'John', lastname: 'Doe', email: 'test@test.com', phone: '0612345678' };
+      profilFacade.updateAuth.mockResolvedValue({ data: null, error: true });
+
+      await expect(profilService.updateUserProfile('123', data)).rejects.toThrow(Exceptions.ProfileUpdateException);
+    });
+
+    it('devrait lever une exception si updateProfile échoue', async () => {
+      const data = { firstname: 'John', lastname: 'Doe', email: 'test@test.com', phone: '0612345678' };
+      profilFacade.updateAuth.mockResolvedValue({ data: {}, error: null });
+      profilFacade.updateProfile.mockResolvedValue({ data: null, error: true });
+
+      await expect(profilService.updateUserProfile('123', data)).rejects.toThrow(Exceptions.ProfileUpdateException);
+    });
+
+    it('devrait mettre à jour le profil correctement', async () => {
+      const data = { firstname: 'John', lastname: 'Doe', email: 'test@test.com', phone: '0612345678' };
+      profilFacade.updateAuth.mockResolvedValue({ data: { authUpdated: true }, error: null });
+      profilFacade.updateProfile.mockResolvedValue({ data: { profileUpdated: true }, error: null });
+
+      const result = await profilService.updateUserProfile('123', data);
+
+      expect(result).toEqual({ profilUpdateAuth: { authUpdated: true }, profilUpdate: { profileUpdated: true } });
+    });
   });
 });

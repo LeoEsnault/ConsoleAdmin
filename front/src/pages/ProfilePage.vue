@@ -125,7 +125,7 @@ const updateProfil = async () => {
   } catch (error) {
     console.error('Erreur lors de la mise à jour du profil', error);
     $q.notify({
-      message: 'Erreur lors de la mise à jour de vos informations.',
+      message: 'Erreur lors de la mise à jour, veuillez vérifier vos informations',
       type: 'negative',
       position: 'bottom-right',
     })

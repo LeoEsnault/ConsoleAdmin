@@ -14,6 +14,7 @@ const groupedExceptions: Partial<Record<HttpStatus, Function[]>> = {
     Exceptions.InvalidEmailFormatException,
     Exceptions.InvalidUserDataException,
     Exceptions.SuperAdminDeleteException,
+    Exceptions.InvalidFormatException,
     Exceptions.InvalidEstablishmentDataException,
     Exceptions.EstablishmentCreationException,
   ],

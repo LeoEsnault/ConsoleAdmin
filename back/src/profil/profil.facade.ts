@@ -9,38 +9,43 @@ export class ProfilFacade {
   async getUser(userId: string): Promise<any> {
     const supabase: SupabaseClient = this.supabaseService.getClient();
 
-    const { data: user } = await supabase.auth.admin.getUserById(userId);
+    return await supabase.auth.admin.getUserById(userId);
 
-    return { user };
   }
   async getProfile(userId: string): Promise<any> {
     const supabase: SupabaseClient = this.supabaseService.getClient();
 
-    const { data: profile } = await supabase.from('profiles').select('*').eq('auth_id', userId).single();
+    return await supabase.from('profiles').select('*').eq('auth_id', userId).single();
 
-
-    return { profile };
   }
 
-  async updateUserProfile(userId: string, data: any): Promise<any> {
-    const supabase: SupabaseClient = this.supabaseService.getClient();
+    async updateAuth(userId: string, data: any): Promise<any>{
+      const supabase: SupabaseClient = this.supabaseService.getClient();
+      
+      const phone = data.phone;
+      const email = data.email;
 
-    const firstname = data.firstname;
-    const lastname = data.lastname;
-    const phone = data.phone;
-    const email = data.email;
+      return await supabase.auth.admin.updateUserById(userId, {
+        email,
+        phone,
+      });
 
-    const { data: user } = await supabase.auth.admin.updateUserById(userId, {
-      email,
-      phone,
-    });
+    }
+    async updateProfile(userId: string, data: any): Promise<any>{
+      const supabase: SupabaseClient = this.supabaseService.getClient();
 
-    const { data: updatedUser } = await supabase
+      const firstname = data.firstname;
+      const lastname = data.lastname;  
+      
+      return await supabase
       .from('profiles')
       .update({ lastname, firstname })
       .eq('auth_id', userId)
       .single();
-
-    return { updatedUser, user };
   }
-}
+  }
+   
+
+  
+  
+  
