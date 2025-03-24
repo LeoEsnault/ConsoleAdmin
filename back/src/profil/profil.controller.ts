@@ -23,7 +23,7 @@ export class ProfilController {
       return await this.profilService.updateUserProfile(userId, data);
     } catch (error) {
       console.error(error);
-      const { message, status } = handleException(error);
+      const { message, status  } = handleException(error);
       throw new HttpException(message, status);
     }
   }

@@ -77,7 +77,7 @@ const refresh = async () => {
                 <router-link to="/me" class="user-name">
                   {{ userName }}
                 </router-link>
-                <ProfileButton />
+                <ProfileButton/>
               </div>
             </div>
 
@@ -194,6 +194,15 @@ const refresh = async () => {
   display: flex;
   align-items: center;
   gap: 2rem;
+  margin-right: -5%;
+}
+
+.user-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 1.5rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .heriade-logo {
@@ -303,7 +312,19 @@ const refresh = async () => {
     width: 6rem;
     height: 2.5rem;
   }
+  
 }
+@media (max-width: 1600px) {
+  .right-section{
+margin-right: -7%;
+  }
+}
+@media (max-width: 1300px) {
+  .right-section{
+margin-right: -8.5%;
+  }
+}
+
 
 /* Dans la section style */
 .modern-drawer {

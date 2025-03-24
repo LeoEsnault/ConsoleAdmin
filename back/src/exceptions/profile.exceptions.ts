@@ -17,3 +17,4 @@ export class ProfileUpdateException extends BadRequestException {
     super(error, message ?? 'Erreur lors de la mise à jour du profil');
   }
 }
+

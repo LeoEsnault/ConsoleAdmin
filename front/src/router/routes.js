@@ -3,9 +3,10 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/UsersPage.vue') },
-      { path: '/me', component: () => import('pages/ProfilePage.vue') }
+    children: [  
+      { path: '', component: () => import('pages/UsersPage.vue') }, 
+      { path: '/me', component: () => import('pages/ProfilePage.vue') },
+      { path: '/update-password', component: () => import('pages/UpdatePasswordPage.vue') }
     ],
     meta: { requiresAuth: true }
   },

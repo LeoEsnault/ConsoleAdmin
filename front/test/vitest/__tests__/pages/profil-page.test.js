@@ -12,9 +12,11 @@ vi.mock('src/stores/profil-store', () => ({
   }),
 }));
 
+
 describe('ProfilPage.vue', () => {
   let wrapper;
   let profilStore;
+  let router;
 
   beforeEach(async () => {
     profilStore = useProfilStore();
@@ -32,6 +34,9 @@ describe('ProfilPage.vue', () => {
     expect(wrapper.find('input[type="phone"]').exists()).toBe(true);
     expect(wrapper.find('button').exists()).toBe(true);
 
+  })
+  it('Verifie la presence du lien pour updatePassword', async () => {
+    expect(wrapper.find('.mdpForget').exists()).toBe(true);
   })
 
   it('Montre bien les données dans le formulaire', async () => {

@@ -39,10 +39,14 @@
               ></q-input>
             </div>
           </div>
+          <div class="mdpForgetProfilLink" style="text-align: center; margin-top: 5vh;">
+             <RouterLink to="/update-password" class="mdpForget">Modifier mon mot de passe</RouterLink>
+        </div>
           <div class="flex flex-center q-pt-lg">
             <q-btn
               label="Enregistrer"
               type="submit"
+              style="margin-top: -1.5vh;"
               :loading="profilStore.loading"
               no-caps
               padding="sm xl"
@@ -115,6 +119,7 @@ const updateProfil = async () => {
       $q.notify({
         message: 'Vos informations ont été mises à jour.',
         type: 'positive',
+        position: 'bottom-right',
       })
     }
   } catch (error) {
@@ -122,6 +127,7 @@ const updateProfil = async () => {
     $q.notify({
       message: 'Erreur lors de la mise à jour de vos informations.',
       type: 'negative',
+      position: 'bottom-right',
     })
   }
 };
@@ -142,8 +148,14 @@ const updateProfil = async () => {
     color: #742282;
   }
   h2{
-    font-size: xx-large;
+    font-size: x-large;
   }
+  @media (max-width: 1024px) {
+ form{
+  margin-left: 12%;
+ }
+  
+}
 
   @media screen and (min-width: 1500px) {
     form {

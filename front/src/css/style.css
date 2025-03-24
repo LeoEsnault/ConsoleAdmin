@@ -1,13 +1,8 @@
-.text-negative {
-    color: #e53935;
-  /* Rouge */
+/* changement position notification*/
+.custom-position{
+  margin-left: 50% !important;
+  
 }
-
-.text-positive {
-  color: #43a047;
-  /* Vert */
-}
-/* bouton kalixys*/
 
 .modern-primary-btn {
   background: white;

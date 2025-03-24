@@ -7,3 +7,5 @@ export function isValidPhone(phone: string) {
   const phoneRegex = /^[1-9]\d{1,14}$/;
   return phoneRegex.test(phone);
 }
+
+export const MIN_LENGHT_PASSWORD = 6

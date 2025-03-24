@@ -75,6 +75,37 @@ export const useProfilStore = defineStore('profil', {
 
     async getUserFromStorage() {
       this.user = getUserFromStorage()
+    },
+
+    async updatePassword(newPassword) {
+      this.loading = true
+      const user = JSON.parse(localStorage.getItem('user'));
+      let id = user ? user.id : null;   
+
+      try {
+        const { error } = await api.put(`/update/${id}`, newPassword)
+        
+          if (error) {
+          console.error(error)
+          return {
+            type: 'error',
+            message: 'Impossible de mettre à jour votre mot de passe.'
+          }
+        }
+        return {
+          type: 'success',
+          message: 'Mot de passe mis à jour avec succés.'
+        }
+      } catch (error) {
+        console.error(error)
+        return {
+          type: 'error',
+          message: 'Une erreur est survenue. Veuillez verifier votre mot de passe.'
+        }
+      } finally {
+        this.loading = false
+      }
     }
+
   }
 });
