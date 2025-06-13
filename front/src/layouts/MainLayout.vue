@@ -67,7 +67,7 @@ const refresh = async () => {
                   fit="contain" class="enterprise-logo" />
               </RouterLink>
 
-              <SelectEnterprise id="select-enterprise" @update="refresh" />
+              <div id="select-enterprise" style="font-weight: bold; font-size: large;">Exalta</div>
             </div>
 
             <!-- Logo Hériade, nom utilisateur et bouton profil -->

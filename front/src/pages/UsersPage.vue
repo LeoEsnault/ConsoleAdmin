@@ -2,8 +2,6 @@
   <q-page class="column flex">
     <!-- DESKTOP -->
     <div v-if="$q.screen.gt.sm" class="column q-px-xl q-py-xl q-gutter-y-md">
-      <AddItemInput label="Ajouter un utilisateur (email):" itemType="email"
-        buttonText="Une seule adresse email par utilisateur." @click="addUser" />
       <div class="q-gutter-y-md">
         <div class="bg-grey-11 row q-py-md q-px-md rounded-borders text-caption">
           <span class="col title">Email</span>
@@ -33,8 +31,6 @@
 
     <!-- MOBILE -->
     <div v-else class="column content-center q-pa-sm q-py-lg">
-      <AddItemInput label="Ajouter un utilisateur (email):" itemType="email"
-        buttonText="Une seule adresse email par utilisateur." @click="addUser" />
 
       <div class="q-gutter-y-md">
         <div v-if="isLoading" class="q-px-xs">
@@ -63,10 +59,9 @@ import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useUsersStore } from 'src/stores/users-store.js'
 import ManageUser from 'src/components/users/ManageUser.vue'
-import AddItemInput from 'src/components/card/AddItemInput.vue'
 import SkeletonText from 'src/components/skeletons/SkeletonText.vue'
 import SkeletonRange from 'src/components/skeletons/SkeletonRange.vue'
-import { checkEmail } from 'src/utils/helpers'
+
 
 const $q = useQuasar()
 const isLoading = ref(true)
@@ -95,31 +90,7 @@ const fetchUsers = async () => {
   }
 }
 
-const addUser = async (email, callback) => {
-  if (!checkEmail(email, $q)) return
 
-  const data = {
-    email: email,
-  }
-  const response = await usersStore.addUser(data)
-
-  if (!response?.data) {
-    if (typeof callback === 'function') {
-      callback(false)
-    }
-  } else {
-    if (typeof callback === 'function') {
-      callback(true)
-    }
-    currentPage.value = 1
-    await fetchUsers()
-  }
-
-  $q.notify({
-    type: response.type,
-    message: response.message
-  })
-}
 
 const refresh = async () => {
   currentPage.value = 1
