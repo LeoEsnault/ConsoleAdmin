@@ -6,7 +6,7 @@ import MobileLogoutButton from 'src/components/buttons/MobileLogoutButton.vue'
 import ProfileButton from 'src/components/buttons/ProfileButton.vue'
 import SideMenu from 'src/components/layouts/SideMenu.vue'
 import { useProfilStore } from "src/stores/profil-store";
-import SelectEnterprise from 'src/components/layouts/SelectEnterprise.vue'
+
 
 const drawer = ref(true)
 const mobileDrawerOpen = ref(false)
@@ -47,9 +47,9 @@ const fetchUserName = async () => {
   }
 };
 
-const refresh = async () => {
-  reloadKey.value++;
-}
+// const refresh = async () => {
+//   reloadKey.value++;
+// }
 </script>
 
 <template>
@@ -113,7 +113,7 @@ const refresh = async () => {
                 fit="contain" class="enterprise-logo" />
             </RouterLink>
 
-            <SelectEnterprise id="select-enterprise" @update="refresh" class="q-pl-md" />
+            <div id="select-enterprise" style="font-weight: bold; padding: 0 0 0 1em;">Exalta</div>
           </div>
           <q-space />
 
@@ -143,14 +143,6 @@ const refresh = async () => {
           <q-btn dense flat round icon="home" class="footer-btn" size="md" to="/">
           </q-btn>
 
-          <!--  En commentaire pour faire plus propre en attendant le lien avec l'app.heriade
-          <q-btn to="/forms" dense flat round class="footer-btn" size="lg">
-            <i class="fa-regular fa-rectangle-list text-white"></i>
-          </q-btn>
-
-          <q-btn to="/" dense flat round class="footer-btn" size="lg">
-            <i class="fa-solid fa-house text-white"></i>
-          </q-btn> -->
         </q-toolbar>
       </q-footer>
 
