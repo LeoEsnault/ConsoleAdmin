@@ -1,6 +1,6 @@
 <template>
   <div class="bg-image">
-    <q-img src="/assets/LogoHeriadeCouleur.png" fit="contain" style="height: 7rem; z-index: 50" class="q-mt-lg"
+    <q-img src="logo2.jpg" fit="contain" style="height: 7rem; z-index: 50" class="q-mt-lg"
       id="logoForgetPassword">
     </q-img>
     <div class="flex justify-center">

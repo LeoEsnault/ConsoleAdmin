@@ -3,7 +3,7 @@
     <q-page-container>
       <q-page class="flex justify-center items-center" @keyup.enter="handleLogin">
         <div style="width: 100%; max-width: 500px; height: 100%" class="q-mb-xl">
-          <q-img src="/assets/LogoHeriadeCouleur.png" fit="contain" style="height: 7rem; z-index: 50"
+          <q-img src="logo2.jpg" fit="contain" style="height: 7rem; z-index: 50"
             class="q-mt-lg"></q-img>
           <q-form class="bg-white rounded-borders q-pa-lg q-ma-sm q-my-xl"
             style="box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1)">

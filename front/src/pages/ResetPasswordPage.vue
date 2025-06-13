@@ -4,7 +4,7 @@
       <q-page class="flex justify-center items-center">
         <div style="width: 100%; max-width: 500px; height: 100%" class="q-mb-xl">
           <q-img
-            src="/assets/LogoHeriadeCouleur.png"
+            src="logo2.jpg"
             fit="contain"
             style="height: 7rem; z-index: 50"
             class="q-mt-lg"

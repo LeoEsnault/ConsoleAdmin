@@ -13,6 +13,7 @@ export const useProfilStore = defineStore('profil', {
       try {
         const user = JSON.parse(localStorage.getItem('user'));
         let user_id = user ? user.id : null;
+        console.log(user_id)
 
         const { data, error: sessionError } = await supabase.auth.getSession();
 

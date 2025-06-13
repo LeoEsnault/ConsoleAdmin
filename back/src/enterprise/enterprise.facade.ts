@@ -15,8 +15,6 @@ export const getProfiles = async (id: string, page: number, pageSize: number, su
   return await supabase
     .from('profiles')
     .select('user_id, id, firstname, lastname, enterprise_id', { count: 'exact' })
-    .eq('enterprise_id', id)
-    .not('user_id', 'in', `(${superAdminIds.join(',')})`) // exclure super_admin
     .range((page - 1) * pageSize, page * pageSize - 1);
 };
 

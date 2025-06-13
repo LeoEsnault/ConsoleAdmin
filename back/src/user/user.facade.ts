@@ -23,14 +23,7 @@ export const getProfiles = async (userIds: string | string[]) => {
 export const getEnterprise = async (enterpriseId: string) => {
   return await supabase
     .from('enterprises')
-    .select(
-      `
-    *,
-    establishments (*),
-    services (*)
-     `
-    )
-    .eq('id', enterpriseId)
+    .select('*')
     .single();
 };
 

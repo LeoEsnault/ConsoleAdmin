@@ -63,7 +63,7 @@ const refresh = async () => {
 
             <div class="left-section">
               <RouterLink to="/" class="logo-container">
-                <q-img loading="lazy" fetchpriority="auto" aria-hidden="true" src="assets/heriade_picto_.png"
+                <q-img loading="lazy" fetchpriority="auto" aria-hidden="true" src="/logo2.jpg"
                   fit="contain" class="enterprise-logo" />
               </RouterLink>
 
@@ -72,7 +72,7 @@ const refresh = async () => {
 
             <!-- Logo Hériade, nom utilisateur et bouton profil -->
             <div class="right-section">
-              <q-img src="/heriade-logo.png" fit="contain" class="heriade-logo" />
+              <q-img src="/logo2.jpg" fit="contain" class="heriade-logo" />
               <div class="user-profile-section">
                 <router-link to="/me" class="user-name">
                   {{ userName }}
@@ -194,7 +194,6 @@ const refresh = async () => {
   display: flex;
   align-items: center;
   gap: 2rem;
-  margin-right: -5%;
 }
 
 .user-profile-section {
@@ -206,7 +205,7 @@ const refresh = async () => {
 }
 
 .heriade-logo {
-  width: 5rem;
+  width: 3rem;
   height: auto;
   transition: transform 0.2s ease;
 }
@@ -314,16 +313,7 @@ const refresh = async () => {
   }
   
 }
-@media (max-width: 1600px) {
-  .right-section{
-margin-right: -7%;
-  }
-}
-@media (max-width: 1300px) {
-  .right-section{
-margin-right: -8.5%;
-  }
-}
+
 
 
 /* Dans la section style */
